@@ -130,6 +130,9 @@ class CFGExtractorVisitor(JavaParserVisitor):
     def visitCatchFormalParameter(self, ctx: JavaParser.CatchFormalParameterContext):
         return build_single_node_graph(ctx)
 
+    def visitContinueStatement(self, ctx: JavaParser.ContinueStatementContext):
+        return build_single_node_graph(ctx)
+
 # def visitReturnStatement(self, ctx: JavaParserVisitor.ReturnStatementContext):
 #     return build_single_node_graph(ctx)
 
