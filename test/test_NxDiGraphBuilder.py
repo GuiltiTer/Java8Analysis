@@ -14,8 +14,8 @@ class TestNxDiGraphBuilder(TestCase):
             (3, ["three"])
         ]
         edges = [
-            (0, 1, True),
-            (0, 2, False),
+            (0, 1, "true"),
+            (0, 2, "False"),
             (1, 3),
             (2, 3)
         ]
@@ -78,3 +78,8 @@ class TestNxDiGraphBuilder(TestCase):
         builder = NxDiGraphBuilder().add_nodes_from(nodes)
         self.assertEqual(nodes, list(builder.node_items))
 
+    def test_compose(self):
+        left = NxDiGraphBuilder().add_nodes_from([(0, ["zero"]), (1, ["one"])])
+        right = NxDiGraphBuilder().add_nodes_from([(1, ["zero"]), (2, ["one"])])
+        composed = left | right
+        print(composed)
