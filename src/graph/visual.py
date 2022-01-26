@@ -19,7 +19,7 @@ def draw_CFG(graph, filename, token_stream=None, format="png", verbose=True):
     gr.node(str(last_node(graph)), label="end", style="filled", fillcolor="#ffaaaa", shape="oval", fontsize=FONT_SIZE)
 
     for f, t, args in graph.edges.data():
-        gr.edge(f"{str(f)}", f"{str(t)}", label=args.get("state"), fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
+        gr.edge(f"{str(f)}", f"{str(t)}", label=args.get("value"), fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
     gr.edge("start", str(head_node(graph)), penwidth=PEN_WIDTH)
 
     gr.render(f"{filename}.gv", view=True)
@@ -56,13 +56,13 @@ def node_content_to_html(node_contents):
 
 def stringify_block(node_args, token_stream):
     if node_args == []: return "[]"
-    cs = [(rule.start.line, extract_exact_text(token_stream, rule)) for rule in node_args["data"]]
+    cs = [(rule.start.line, extract_exact_text(token_stream, rule)) for rule in node_args["value"]]
     b = node_content_to_html(cs)
     return b
 
 
 def stringify_block_lineno_only(node_args):
-    data = node_args["data"]
+    data = node_args["value"]
     left, right = data[0].start.line, data[-1].stop.line
     if left == right:
         return f"{left}"
