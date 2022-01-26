@@ -30,7 +30,18 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @staticmethod
     def embed_in_if_else(condition: RuleContext, then_part: "IDiGraphBuilder", else_part: "IDiGraphBuilder"):
-        pass
+        g = DiGraphBuilder()
+        g_head = 0
+        g.add_node(g_head, value=[condition])
+        then_part = then_part >> len(g)
+        else_part = else_part >> len(g) + len(then_part)
+        g_last = else_part.last + 1
+        g.add_node(g_last, value=[])
+        g = g | then_part | else_part
+        return g.add_edges_from([(g_head, else_part.head, EdgeLabel.false.name),
+                                 (g_head, then_part.head, EdgeLabel.true.name),
+                                 (then_part.last, g_last),
+                                 (else_part.last, g_last)])
 
     @staticmethod
     def embed_in_switch_case(switcher: RuleContext, labels: List[RuleContext], bodies: List["IDiGraphBuilder"]):
