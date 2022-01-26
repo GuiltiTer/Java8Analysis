@@ -1,11 +1,11 @@
 import networkx as nx
 
-from src.antlr.JavaParser import JavaParser
+from antlr.gen.JavaParser import JavaParser
 from src.antlr.rule_utils import is_break
 from src.graph.utils import (shift_node_labels,
                              head_node, last_node,
                              split_on_break, split_on_continue, split_on_return, split_on_throw,
-                             compose, reorder_node_labels, solve_null_nodes)
+                             compose, solve_null_nodes)
 
 
 def embed_in_conditional_for(gin, initializer, condition, successor):
@@ -260,5 +260,5 @@ def embed_in_try_catch_structure(try_body, catch_bodies):
 
     g.nodes[g_last]["data"] = []
 
-    g = split_on_throw(g, g_handler_seq_head)
+    g = split_on_throw(g, catch_bodies_ranges[0][0])
     return g

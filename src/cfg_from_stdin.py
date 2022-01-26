@@ -1,7 +1,7 @@
 from antlr4 import CommonTokenStream, StdinStream, FileStream
 
-from src.antlr.JavaLexer import JavaLexer
-from src.antlr.JavaParser import JavaParser
+from antlr.gen.JavaLexer import JavaLexer
+from antlr.gen.JavaParser import JavaParser
 from src.cfg_extractor.cfg_extractor_visitor import CFGExtractorVisitor
 from src.graph.visual import draw_CFG
 

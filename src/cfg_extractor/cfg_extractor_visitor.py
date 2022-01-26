@@ -1,11 +1,11 @@
-from src.antlr.JavaParserVisitor import JavaParserVisitor
-from src.antlr.JavaParser import JavaParser
+from antlr.gen.JavaParserVisitor import JavaParserVisitor
+from antlr.gen.JavaParser import JavaParser
 from src.cfg_extractor.lang_structures import (embed_in_function_structure, embed_in_do_while_structure,
                                                embed_in_for_structure, embed_in_switch_structure,
                                                embed_in_if_structure, embed_in_if_else_structure,
                                                embed_in_while_structure, embed_in_try_catch_structure)
 
-from src.graph.utils import (build_single_node_graph, concat_graphs, build_isolated_node_graph)
+from src.graph.utils import (build_single_node_graph, concat_graphs)
 
 import networkx as nx
 import matplotlib.pyplot as plt
