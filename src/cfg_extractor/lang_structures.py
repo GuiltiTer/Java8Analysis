@@ -144,9 +144,6 @@ def embed_in_if_else_structure(gin_true, gin_false, condition):
 def get_graph_label_range(gin): return head_node(gin), last_node(gin)
 
 
-# def get_graph_label_rage_try(gin): return head_node(h), last_node(h) for case, h in zip()
-
-
 def build_initial_conditional_graph(condition):
     g = nx.DiGraph()
     g_head = 0

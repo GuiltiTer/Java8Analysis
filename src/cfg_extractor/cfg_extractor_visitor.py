@@ -1,19 +1,10 @@
-from antlr.gen.JavaParserVisitor import JavaParserVisitor
 from antlr.gen.JavaParser import JavaParser
+from antlr.gen.JavaParserVisitor import JavaParserVisitor
 from src.cfg_extractor.lang_structures import (embed_in_function_structure, embed_in_do_while_structure,
                                                embed_in_for_structure, embed_in_switch_structure,
                                                embed_in_if_structure, embed_in_if_else_structure,
                                                embed_in_while_structure, embed_in_try_catch_structure)
-
 from src.graph.utils import (build_single_node_graph, concat_graphs)
-
-import networkx as nx
-import matplotlib.pyplot as plt
-
-
-def draw(graph: nx.DiGraph):
-    nx.draw(graph, with_labels=True)
-    plt.show()
 
 
 class CFGExtractorVisitor(JavaParserVisitor):
@@ -143,78 +134,3 @@ class CFGExtractorVisitor(JavaParserVisitor):
 
     def visitReturnStatement(self, ctx: JavaParser.ReturnStatementContext):
         return build_single_node_graph(ctx)
-
-# def visitSelectionstatement2(self, ctx: JavaParserVisitor.Selectionstatement2Context):
-#     condition = ctx.condition()
-#     if_body = ctx.statement(0)
-#     else_body = ctx.statement(1)
-#     gin_if = self.visit(if_body)
-#     gin_else = self.visit(else_body)
-#     return embed_in_if_else_structure(gin_if, gin_else, condition)
-#
-# def visitSelectionstatement3(self, ctx: JavaParserVisitor.Selectionstatement3Context):
-#     condition = ctx.condition()
-#     gin = self.visit(ctx.statement())
-#     return embed_in_switch_structure(gin, condition)
-#
-# def visitIterationstatement1(self, ctx: JavaParserVisitor.Iterationstatement1Context):
-#     condition = ctx.condition()
-#     gin = self.visit(ctx.statement())
-#     return embed_in_while_structure(gin, condition)
-#
-# def visitIterationstatement2(self, ctx: JavaParserVisitor.Iterationstatement2Context):
-#     condition = ctx.expression()
-#     gin = self.visit(ctx.statement())
-#      return embed_in_do_while_structure(gin, condition)
-#
-# def visitIterationstatement3(self, ctx: JavaParserVisitor.Iterationstatement3Context):
-#     init = ctx.forinitstatement()
-#     condition = ctx.condition()
-#     successor = ctx.expression()
-#     gin = self.visit(ctx.statement())
-#     return embed_in_for_structure(gin, init, condition, successor)
-#
-# def visitTryblock(self, ctx: JavaParserVisitor.TryblockContext):
-#     g_body = self.visit(ctx.compoundstatement())
-#     g_handler_seq = self.visit(ctx.handlerseq())
-#     return embed_in_try_catch_structure(g_body, g_handler_seq)
-#
-# def visitHandlerseq(self, ctx: JavaParserVisitor.HandlerseqContext):
-#     g_handler = self.visit(ctx.handler())
-#     g = g_handler.copy()
-#     if ctx.handlerseq():
-#         g_handler_seq = self.visit(ctx.handlerseq())
-#         g = concat_graphs(g, g_handler_seq)
-#     return g
-#
-# def visitHandler(self, ctx: JavaParserVisitor.HandlerContext):
-#     return self.visit(ctx.compoundstatement())
-#
-# def visitThrowexpression(self, ctx: JavaParserVisitor.ThrowexpressionContext):
-#     return build_single_node_graph(ctx)
-#
-# def visitJumpstatement1(self, ctx: JavaParserVisitor.Jumpstatement1Context):
-#     return build_single_node_graph(ctx)
-#
-# def visitJumpstatement2(self, ctx: JavaParserVisitor.Jumpstatement2Context):
-#     return build_single_node_graph(ctx)
-#
-# def visitJumpstatement3(self, ctx: JavaParserVisitor.Jumpstatement3Context):
-#     return build_single_node_graph(ctx)
-#
-# def visitStatementseq1(self, ctx: JavaParserVisitor.Statementseq1Context):
-#     return self.visit(ctx.statement())
-#
-# def visitStatementseq2(self, ctx: JavaParserVisitor.Statementseq2Context):
-#     gin1 = self.visit(ctx.statementseq())
-#     gin2 = self.visit(ctx.statement())
-#     return concat_graphs(gin1, gin2)
-#
-# def visitDeclarationstatement(self, ctx: JavaParserVisitor.DeclarationstatementContext):
-#     return build_single_node_graph(ctx)
-#
-# def visitLabeledstatement2(self, ctx: JavaParserVisitor.Labeledstatement2Context):
-#     return build_isolated_node_graph(ctx.constantexpression(), ctx.statement())
-#
-# def visitLabeledstatement3(self, ctx: JavaParserVisitor.Labeledstatement3Context):
-#     return build_isolated_node_graph(ctx.Default(), ctx.statement())

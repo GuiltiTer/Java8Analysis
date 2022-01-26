@@ -117,19 +117,6 @@ def build_single_node_graph(data=None):
     return g
 
 
-# def concat_graphs(gin):
-#     for i in range(len(gin) - 1):
-#         gin[i]: nx.DiGraph()
-#         gin[i + 1]: nx.DiGraph()
-#         gin[i + 1] = shift_node_labels(gin[i + 1], len(gin[i]) - 1)
-#         gin1_last = last_node(gin[i])
-#         gin2_head = head_node(gin[i + 1])
-#         data = gin[i].nodes[gin1_last]["data"] + gin[i + 1].nodes[gin2_head]["data"]
-#         g = compose(gin[i], gin[i + 1])
-#         g.nodes[gin1_last]["data"] = data
-#         return g
-
-
 def concat_graphs(gin1: nx.DiGraph, gin2: nx.DiGraph):
     gin2 = shift_node_labels(gin2, len(gin1) - 1)
 
