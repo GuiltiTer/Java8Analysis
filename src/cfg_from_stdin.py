@@ -7,12 +7,15 @@ from src.graph.visual import draw_CFG
 
 
 def prompt():
-    is_read_file = input("Read from file/stream (f/s)? ").startswith(("f", "F"))
-    is_verbose = input("Verbose graph draw (y/n)? ").startswith(("y", "Y"))
+    # is_read_file = input("Read from file/stream (f/s)? ").startswith(("f", "F"))
+    # is_verbose = input("Verbose graph draw (y/n)? ").startswith(("y", "Y"))
+    is_read_file = True
+    is_verbose = True
     file_path = None
     if is_read_file:
-        default_path = "../test_source/throw.java"
-        file_path = input("Enter file path: ")
+        default_path = "../test_source/if.java"
+        # file_path = input("Enter file path: ")
+        file_path = ""
         file_path = file_path if file_path else default_path
 
     return is_read_file, is_verbose, file_path
