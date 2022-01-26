@@ -49,7 +49,18 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @staticmethod
     def embed_in_while(condition: RuleContext, body: "IDiGraphBuilder"):
-        pass
+        g = DiGraphBuilder()
+        g_head, g_condition = 0, 1
+        g.add_nodes_from([(g_head, []),
+                          (g_condition, [condition])])
+        body = body >> len(g)
+        g_last = body.last + 1
+        g.add_node(g_last, value=[])
+        g = g | body
+        return g.add_edges_from([(g_head, g_condition),
+                                 (g_condition, body.head, EdgeLabel.true.name),
+                                 (g_condition, g_last, EdgeLabel.false.name),
+                                 (body.last, g_condition)])
 
     @staticmethod
     def embed_in_do_while(condition: RuleContext, body: "IDiGraphBuilder"):
