@@ -76,11 +76,11 @@ class CFGExtractorVisitor(JavaParserVisitor):
         body_graph = self.visit(ctx.statement())
         return DiGraphEmbedder.embed_in_while(condition, body_graph)
 
-    # def visitDoStatement(self, ctx: JavaParser.DoStatementContext):
-    #     condition = ctx.expression()
-    #     do_body = ctx.statement()
-    #     gin = self.visit(do_body)
-    #     return embed_in_do_while_structure(gin, condition)
+    def visitDoStatement(self, ctx: JavaParser.DoStatementContext):
+        condition = ctx.expression()
+        do_body = ctx.statement()
+        do_body_graph = self.visit(do_body)
+        return DiGraphEmbedder.embed_in_do_while(condition, do_body_graph)
 
     # def visitTryStatement1(self, ctx: JavaParser.TryStatement1Context):
     #     try_body = self.visit(ctx.block())
