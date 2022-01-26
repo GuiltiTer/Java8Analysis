@@ -31,9 +31,8 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @staticmethod
     def embed_in_if(condition: RuleContext, then_part: "IDiGraphBuilder"):
-        g = DiGraphBuilder()
         g_head = 0
-        g.add_node(g_head, value=[condition])
+        g = DiGraphBuilder().add_node(g_head, value=[condition])
         then_part = then_part >> len(g)
         g_last = then_part.last + 1
         g.add_node(g_last, value=[])
@@ -44,9 +43,8 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @staticmethod
     def embed_in_if_else(condition: RuleContext, then_part: "IDiGraphBuilder", else_part: "IDiGraphBuilder"):
-        g = DiGraphBuilder()
         g_head = 0
-        g.add_node(g_head, value=[condition])
+        g = DiGraphBuilder().add_node(g_head, value=[condition])
         then_part = then_part >> len(g)
         else_part = else_part >> len(g) + len(then_part)
         g_last = else_part.last + 1
@@ -63,10 +61,9 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @staticmethod
     def embed_in_while(condition: RuleContext, body: "IDiGraphBuilder"):
-        g = DiGraphBuilder()
         g_head, g_condition = 0, 1
-        g.add_nodes_from([(g_head, []),
-                          (g_condition, [condition])])
+        g = DiGraphBuilder().add_nodes_from([(g_head, []),
+                                             (g_condition, [condition])])
         body = body >> len(g)
         g_last = body.last + 1
         g.add_node(g_last, value=[])
@@ -78,9 +75,8 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @staticmethod
     def embed_in_do_while(condition: RuleContext, body: "IDiGraphBuilder"):
-        g = DiGraphBuilder()
         g_head = 0
-        g.add_node(g_head, [])
+        g = DiGraphBuilder().add_node(g_head, [])
         body = body >> len(g)
         g_condition = body.last + 1
         g_last = g_condition + 1
@@ -104,8 +100,8 @@ class DiGraphEmbedder(ILanguagePattern):
     @staticmethod
     def embed_in_function(body: "IDiGraphBuilder"):
         # todo: return and resolve null nodes
-        g = DiGraphBuilder()
         end = body.last + 1
+        g = DiGraphBuilder()
         g = g | body
         return (g
                 .add_node(end, value=[])
