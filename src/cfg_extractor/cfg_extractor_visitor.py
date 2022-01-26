@@ -33,7 +33,7 @@ class CFGExtractorVisitor(JavaParserVisitor):
         return self.visit(ctx.blockStatements())
 
     def visitBlockStatements(self, ctx: JavaParser.BlockStatementsContext):
-        gins = [self.visit(block) for block in ctx.blockStatement()]
+        gins = (self.visit(block) for block in ctx.blockStatement())
         return reduce(lambda acc, x: acc + x, gins)
 
     def visitIfThenStatement(self, ctx: JavaParser.IfThenStatementContext):
