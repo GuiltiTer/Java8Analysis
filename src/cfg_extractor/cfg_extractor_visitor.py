@@ -71,10 +71,10 @@ class CFGExtractorVisitor(JavaParserVisitor):
     def visitBasicForStatement(self, ctx: JavaParser.BasicForStatementContext):
         init = ctx.forInit()
         condition = ctx.expression()
-        succsessor = ctx.forUpdate()
+        successor = ctx.forUpdate()
         for_body = ctx.statement()
         gin = self.visit(for_body)
-        return embed_in_for_structure(gin, init, condition, succsessor)
+        return embed_in_for_structure(gin, init, condition, successor)
 
     def visitWhileStatement(self, ctx: JavaParser.WhileStatementContext):
         condition = ctx.expression()
@@ -96,8 +96,8 @@ class CFGExtractorVisitor(JavaParserVisitor):
 
     def visitCatchClause(self, ctx: JavaParser.CatchClauseContext):
         catch_body = self.visit(ctx.block())
-        exeption = self.visit(ctx.catchFormalParameter())
-        return exeption, catch_body
+        exception = self.visit(ctx.catchFormalParameter())
+        return exception, catch_body
 
     def visitCatchFormalParameter(self, ctx: JavaParser.CatchFormalParameterContext):
         return build_single_node_graph(ctx)
