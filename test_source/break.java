@@ -6,8 +6,7 @@ class a{
     for (int i =0 ;i<10 ;i++)
     	{
             if(a>6){
-                a++;
-                continue;
+                break;
             }
             a++;
             b--;
