@@ -95,6 +95,9 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
     def __add__(self, other: "IDiGraphBuilder") -> "IDiGraphBuilder":
         """ concatenate graphs, Also merge the common node data"""
 
+    def __or__(self, other: "IDiGraphBuilder") -> "IDiGraphBuilder":
+        """compose graphs"""
+
     @abc.abstractmethod
     def __rshift__(self, n: int) -> "IDiGraphBuilder":
         """shift right the nodes"""
@@ -106,3 +109,7 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __setitem__(self, item: Union[int, Tuple], content: Any):
         """set content of a node"""
+
+    @abc.abstractmethod
+    def __len__(self):
+        """number of nodes"""
