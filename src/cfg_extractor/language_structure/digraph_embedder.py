@@ -16,6 +16,20 @@ class EdgeLabel(Enum):
 class DiGraphEmbedder(ILanguagePattern):
 
     @staticmethod
+    def concat(left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
+        right = right >> len(left)
+
+        g = (DiGraphBuilder()
+             .add_nodes_from([(left.last, []), (right.head, [])])
+             .add_edge(left.last, right.head))
+        return g | left | right
+
+    @staticmethod
+    def merge(left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
+        right = right >> len(left) - 1
+        return left | right
+
+    @staticmethod
     def embed_in_if(condition: RuleContext, then_part: "IDiGraphBuilder"):
         g = DiGraphBuilder()
         g_head = 0

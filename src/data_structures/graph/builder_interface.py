@@ -91,12 +91,8 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
     def as_dict(self) -> Dict:
         """get a dictionary presentation of graph"""
 
-    @abc.abstractmethod
-    def __add__(self, other: "IDiGraphBuilder") -> "IDiGraphBuilder":
-        """ concatenate graphs, Also merge the common node data"""
-
     def __or__(self, other: "IDiGraphBuilder") -> "IDiGraphBuilder":
-        """compose graphs"""
+        """compose graphs and merge graph data"""
 
     @abc.abstractmethod
     def __rshift__(self, n: int) -> "IDiGraphBuilder":

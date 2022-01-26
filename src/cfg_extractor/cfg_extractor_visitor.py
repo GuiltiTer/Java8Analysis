@@ -34,7 +34,7 @@ class CFGExtractorVisitor(JavaParserVisitor):
 
     def visitBlockStatements(self, ctx: JavaParser.BlockStatementsContext):
         gins = (self.visit(block) for block in ctx.blockStatement())
-        return reduce(lambda acc, x: acc + x, gins)
+        return reduce(DiGraphEmbedder.merge, gins)
 
     def visitIfThenStatement(self, ctx: JavaParser.IfThenStatementContext):
         condition = ctx.expression()

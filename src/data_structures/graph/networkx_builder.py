@@ -95,17 +95,14 @@ class NxDiGraphBuilder(IDiGraphBuilder):
     def as_dict(self):
         return {"nodes": list(self.node_items), "edges": list(self.edge_items)}
 
-    def __add__(self, other):
-        other = other >> len(self) - 1
-        data = self[self.last] + other[other.head]
-
-        g = self | other
-        g[self.last] = data
-        return g
-
     def __or__(self, other):
+        common_nodes = set(self.node_keys) & set(other.node_keys)
+        common_data_by_nodes = [(node, self[node] + other[node]) for node in common_nodes]
+
         g = NxDiGraphBuilder()
         g.__graph = nx.compose(other.__graph, self.__graph)
+        for node, data in common_data_by_nodes:
+            g[node] = data
         return g
 
     def __rshift__(self, n):
