@@ -96,7 +96,7 @@ class NxDiGraphBuilder(IDiGraphBuilder):
         return {"nodes": list(self.node_items), "edges": list(self.edge_items)}
 
     def __add__(self, other):
-        other = other >> len(self.__graph) - 1
+        other = other >> len(self) - 1
         data = self[self.last] + other[other.head]
 
         g = self | other
@@ -125,9 +125,6 @@ class NxDiGraphBuilder(IDiGraphBuilder):
 
     def __len__(self):
         return len(self.__graph)
-
-    def __repr__(self):
-        return self.as_dict()
 
     def __str__(self):
         return str(self.as_dict())
