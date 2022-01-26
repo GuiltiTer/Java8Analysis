@@ -46,7 +46,7 @@ class NxDiGraphBuilder(IDiGraphBuilder):
     def last(self):
         return max(self.node_keys)
 
-    def add_node(self, node, value=None):
+    def add_node(self, node=0, value=None):
         self.__graph.add_node(node, value=value)
         return self
 
@@ -93,9 +93,17 @@ class NxDiGraphBuilder(IDiGraphBuilder):
         return self.__graph
 
     def as_dict(self):
-        return {"nodes": list(self.node_keys), "edges": list(self.edge_keys)}
+        return {"nodes": list(self.node_items), "edges": list(self.edge_items)}
 
     def __add__(self, other):
+        other = other >> len(self.__graph) - 1
+        data = self[self.last] + other[other.head]
+
+        g = self | other
+        g[self.last] = data
+        return g
+
+    def __or__(self, other):
         g = NxDiGraphBuilder()
         g.__graph = nx.compose(other.__graph, self.__graph)
         return g
@@ -114,6 +122,9 @@ class NxDiGraphBuilder(IDiGraphBuilder):
             self.__graph.edges[item][self.VALUE] = content
         else:
             self.__graph.nodes[item][self.VALUE] = content
+
+    def __len__(self):
+        return len(self.__graph)
 
     def __repr__(self):
         return self.as_dict()
