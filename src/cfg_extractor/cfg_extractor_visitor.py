@@ -96,12 +96,20 @@ class CFGExtractorVisitor(JavaParserVisitor):
         return embed_in_do_while_structure(gin, condition)
 
     def visitTryStatement1(self, ctx: JavaParser.TryStatement1Context):
-        try_body = ctx.block()
-        catch_body = ctx.catches()
-        return embed_in_try_catch_structure(try_body, catch_body)
+        try_body = self.visit(ctx.block())
+        catches = self.visit(ctx.catches())
+        return embed_in_try_catch_structure(try_body, catches)
+
+    def visitCatches(self, ctx: JavaParser.CatchesContext):
+        return [self.visit(catches) for catches in ctx.catchClause()]
 
     def visitCatchClause(self, ctx: JavaParser.CatchClauseContext):
-        pass
+        catch_body = self.visit(ctx.block())
+        exeption = self.visit(ctx.catchFormalParameter())
+        return exeption, catch_body
+
+    def visitCatchFormalParameter(self, ctx: JavaParser.CatchFormalParameterContext):
+        return build_single_node_graph(ctx)
 
     def visitExpressionStatement(self, ctx: JavaParser.ExpressionStatementContext):
         return build_single_node_graph(ctx)
@@ -127,14 +135,14 @@ class CFGExtractorVisitor(JavaParserVisitor):
     def visitPostIncrementExpression(self, ctx: JavaParser.PostIncrementExpressionContext):
         return build_single_node_graph(ctx)
 
-    def visitCatchFormalParameter(self, ctx: JavaParser.CatchFormalParameterContext):
-        return build_single_node_graph(ctx)
-
     def visitContinueStatement(self, ctx: JavaParser.ContinueStatementContext):
         return build_single_node_graph(ctx)
 
-# def visitReturnStatement(self, ctx: JavaParserVisitor.ReturnStatementContext):
-#     return build_single_node_graph(ctx)
+    def visitThrowStatement(self, ctx: JavaParser.ThrowStatementContext):
+        return build_single_node_graph(ctx)
+
+    def visitReturnStatement(self, ctx: JavaParser.ReturnStatementContext):
+        return build_single_node_graph(ctx)
 
 # def visitSelectionstatement2(self, ctx: JavaParserVisitor.Selectionstatement2Context):
 #     condition = ctx.condition()

@@ -144,6 +144,9 @@ def embed_in_if_else_structure(gin_true, gin_false, condition):
 def get_graph_label_range(gin): return head_node(gin), last_node(gin)
 
 
+# def get_graph_label_rage_try(gin): return head_node(h), last_node(h) for case, h in zip()
+
+
 def build_initial_conditional_graph(condition):
     g = nx.DiGraph()
     g_head = 0
@@ -178,10 +181,7 @@ def embed_in_switch_structure(gin_by_case: nx.DiGraph, condition):
     g, g_head = build_initial_conditional_graph(condition)
     g_last = len(gin_by_case) + 1
     cases, gins = zip(*gin_by_case)
-
-    # sub_graphs, cases = extract_case_sub_graphs(gin_by_case)
     hs = shift_case_graphs(gins, len(g))
-    # for case in gin_by_case:
     g.add_edges_from([(g_head, head_node(h), {"state": case.getText()}) for h, case in zip(hs, cases)])
     with_breaks, trails = partition_graphs_on_break(hs)
     g.add_edges_from([(last_node(h), g_last) for h in with_breaks])
@@ -246,16 +246,18 @@ def embed_in_function_structure(gin):
     return solve_null_nodes(g)
 
 
-def embed_in_try_catch_structure(g_body, g_handler_seq):
+def embed_in_try_catch_structure(try_body, catch_bodies):
     g = nx.DiGraph()
-    g_handler_seq = shift_node_labels(g_handler_seq, len(g_body))
-    g_handler_seq_head, g_handler_seq_last = get_graph_label_range(g_handler_seq)
-    g_body_last = last_node(g_body)
+    exceptions, catch_bodies = zip(*catch_bodies)
+    catch_bodies = shift_case_graphs(catch_bodies, len(try_body))
+    catch_bodies_ranges = [get_graph_label_range(catch_body) for catch_body in catch_bodies]
+    g_body_last = last_node(try_body)
 
-    g_last = g_handler_seq_last + 1
-    g.add_edges_from([(g_body_last, g_last),
-                      (g_handler_seq_last, g_last)])
-    g = compose(g, g_handler_seq, g_body)
+    g_last = catch_bodies_ranges[-1][-1] + 1
+    g.add_edge(g_body_last, g_last)
+    g.add_edges_from([(last, g_last) for _, last in catch_bodies_ranges])
+    g = compose(g, try_body, *catch_bodies)
+
     g.nodes[g_last]["data"] = []
 
     g = split_on_throw(g, g_handler_seq_head)
