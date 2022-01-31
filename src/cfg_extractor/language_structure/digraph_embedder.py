@@ -89,8 +89,50 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (g_condition, g_last, EdgeLabel.false.name)])
 
     @staticmethod
-    def embed_in_for(condition: RuleContext, body: "IDiGraphBuilder"):
-        pass
+    def embed_in_for(condition: RuleContext,
+                     initializer: RuleContext,
+                     body: IDiGraphBuilder,
+                     successor: RuleContext) -> IDiGraphBuilder:
+        if condition:
+            g = DiGraphEmbedder.embed_in_conditional_for(condition, initializer, body, successor)
+        else:
+            g = DiGraphEmbedder.embed_in_unconditional_for(initializer, body, successor)
+
+        return g
+
+    @staticmethod
+    def embed_in_conditional_for(condition: RuleContext,
+                                 initializer: RuleContext,
+                                 body: IDiGraphBuilder,
+                                 successor: RuleContext) -> IDiGraphBuilder:
+
+        g_head, g_condition = 0, 1
+        g = DiGraphBuilder().add_nodes_from([(g_head, [initializer]),
+                                             (g_condition, [condition])])
+        body = body >> len(g)
+        g_successor = body.last + 1
+        g_last = g_successor + 1
+        g.add_nodes_from([(g_last, []), (g_successor, [successor] if successor else [])])
+        g = g | body
+
+        return g.add_edges_from([(g_head, g_condition), (g_condition, body.head, EdgeLabel.true.name),
+                                 (g_condition, g_last, EdgeLabel.false.name), (body.last, g_successor),
+                                 (g_successor, g_condition)])
+
+    @staticmethod
+    def embed_in_unconditional_for(initializer: RuleContext,
+                                   body: IDiGraphBuilder,
+                                   successor: RuleContext) -> IDiGraphBuilder:
+        g_head = 0
+        g = DiGraphBuilder().add_node(g_head, [initializer] if initializer else [])
+        body = body >> len(g)
+        g_succsessor = body.last + 1
+        g_last = g_succsessor + 1
+        g.add_nodes_from([(g_last, []), (g_succsessor, [successor] if successor else [])])
+        g = g | body
+        return g.add_edges_from([(g_head, body.head),
+                                 (body.last, g_succsessor),
+                                 (g_succsessor, body.head)])
 
     @staticmethod
     def embed_in_try_catch(body: "IDiGraphBuilder", exceptions: List[RuleContext],

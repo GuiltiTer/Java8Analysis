@@ -54,8 +54,25 @@ class ILanguagePattern(metaclass=abc.ABCMeta):
     @staticmethod
     @abc.abstractmethod
     def embed_in_for(condition: RuleContext,
-                     body: IDiGraphBuilder) -> IDiGraphBuilder:
+                     initializer: RuleContext,
+                     body: IDiGraphBuilder,
+                     successor: RuleContext) -> IDiGraphBuilder:
         """embed the body graph into a for graph pattern"""
+
+    @staticmethod
+    @abc.abstractmethod
+    def embed_in_conditional_for(condition: RuleContext,
+                                 initializer: RuleContext,
+                                 body: IDiGraphBuilder,
+                                 successor: RuleContext) -> IDiGraphBuilder:
+        """embed the body graph into a conditional for graph pattern"""
+
+    @staticmethod
+    @abc.abstractmethod
+    def embed_in_unconditional_for(initializer: RuleContext,
+                                   body: IDiGraphBuilder,
+                                   successor: RuleContext) -> IDiGraphBuilder:
+        """embed the body graph into an unconditional for graph pattern"""
 
     @staticmethod
     @abc.abstractmethod
