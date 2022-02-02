@@ -142,6 +142,13 @@ class DiGraphEmbedder(ILanguagePattern):
     @staticmethod
     def embed_in_function(body: "IDiGraphBuilder"):
         # todo: return and resolve null nodes
+        g = DiGraphBuilder()
+        g = g | body
+        if body[body.last] == []:
+            new_end = body.predecessors(body.last)
+            print(new_end)
+            g.remove_node(body.last)
+
         end = body.last + 1
         g = DiGraphBuilder()
         g = g | body
