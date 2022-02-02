@@ -50,6 +50,14 @@ class NxDiGraphBuilder(IDiGraphBuilder):
         self.__graph.add_node(node, value=value)
         return self
 
+    def successors(self, node: int):
+        for successor in self.__graph.successors(node):
+            yield successor
+
+    def predecessors(self, node: int):
+        for predecessor in self.__graph.predecessors(node):
+            return predecessor
+
     def remove_node(self, node):
         self.__graph.remove_node(node)
         return self

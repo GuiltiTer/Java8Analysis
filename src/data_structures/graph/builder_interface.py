@@ -44,6 +44,14 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
         """get the last node"""
 
     @abc.abstractmethod
+    def successors(self, node: int):
+        """successors of a given node"""
+
+    @abc.abstractmethod
+    def predecessors(self, node: int):
+        """predecessors of a given node"""
+
+    @abc.abstractmethod
     def add_node(self, node: int, value: Any = None) -> "IDiGraphBuilder":
         """add a node"""
 
