@@ -6,6 +6,7 @@ from src.cfg_extractor.language_structure.structure_pattern_interface import ILa
 from src.data_structures.graph.builder_interface import IDiGraphBuilder
 from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
 from enum import Enum, auto
+from src.antlr.rule_utils import is_break, is_return, is_continue, is_throw
 
 
 class EdgeLabel(Enum):
@@ -68,10 +69,12 @@ class DiGraphEmbedder(ILanguagePattern):
         g_last = body.last + 1
         g.add_node(g_last, value=[])
         g = g | body
-        return g.add_edges_from([(g_head, g_condition),
-                                 (g_condition, body.head, EdgeLabel.true.name),
-                                 (g_condition, g_last, EdgeLabel.false.name),
-                                 (body.last, g_condition)])
+        g.add_edges_from([(g_head, g_condition),
+                          (g_condition, body.head, EdgeLabel.true.name),
+                          (g_condition, g_last, EdgeLabel.false.name),
+                          (body.last, g_condition)])
+        g = cls.__split_on_continue(g, g_condition)
+        return cls.__split_on_break(g)
 
     @classmethod
     def embed_in_do_while(cls, condition: RuleContext, body: "IDiGraphBuilder"):
@@ -160,4 +163,35 @@ class DiGraphEmbedder(ILanguagePattern):
         end = body.last + 1
         g = DiGraphBuilder()
         g = g | body
+        g = DiGraphEmbedder.__split_on_return(g)
         return cls.__resolve_null_node(g, body, end)
+
+    @classmethod
+    def __split_on_return(cls, graph: IDiGraphBuilder):
+        return cls.__direct_nodes_to_if(graph, graph.last, is_return)
+
+    @classmethod
+    def __split_on_continue(cls, graph: "IDiGraphBuilder", direction_reference):
+        return cls.__direct_nodes_to_if(graph, direction_reference, is_continue)
+
+    @classmethod
+    def __split_on_break(cls, graph: "IDiGraphBuilder"):
+        return cls.__direct_nodes_to_if(graph, graph.last, is_break)
+
+    @classmethod
+    def __split_on_throw(cls, graph: "IDiGraphBuilder", direction_reference):
+        return cls.__direct_nodes_to_if(graph, direction_reference, is_throw)
+
+    @classmethod
+    def __direct_nodes_to_if(cls, graph: "IDiGraphBuilder",
+                             direction_reference,
+                             predicate):
+        h = graph
+        for label, data in graph.node_items:
+            for ctx in data:
+                if predicate(ctx):
+                    h.remove_edges_from([(label, successor) for successor in graph.successors(label)])
+                    h.add_edge(label, direction_reference)
+                    h[label] = data[:data.index(ctx)]
+                    break
+        return h
