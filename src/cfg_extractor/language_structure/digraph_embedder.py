@@ -139,15 +139,20 @@ class DiGraphEmbedder(ILanguagePattern):
                            catch_bodies: List["IDiGraphBuilder"]):
         pass
 
-    @staticmethod
-    def embed_in_function(body: "IDiGraphBuilder"):
-        # todo: return and resolve null nodes
-        g = DiGraphBuilder()
-        g = g | body
+    @classmethod
+    def __resolve_null_node(cls, graph: IDiGraphBuilder, body, end):
         if body[body.last] == []:
-            new_end = body.predecessors(body.last)
-            print(new_end)
-            g.remove_node(body.last)
+            end -= 1
+            predecessors = []
+            for data in body.as_dict()['edges']:
+                if data[0][1] == body.last:
+                    predecessors.append((data[0][0], data[1]))
+            body.remove_node(body.last)
+            for predecessor in predecessors:
+                graph.add_edge(predecessor[0], end, predecessor[1])
+        else:
+            graph.add_node(end, value=[]).add_edge(body.last, end)
+        return graph
 
     @classmethod
     def embed_in_function(cls, body: "IDiGraphBuilder"):
@@ -155,6 +160,4 @@ class DiGraphEmbedder(ILanguagePattern):
         end = body.last + 1
         g = DiGraphBuilder()
         g = g | body
-        return (g
-                .add_node(end, value=[])
-                .add_edge(body.last, end))
+        return cls.__resolve_null_node(g, body, end)
