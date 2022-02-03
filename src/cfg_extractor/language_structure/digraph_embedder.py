@@ -15,8 +15,8 @@ class EdgeLabel(Enum):
 
 class DiGraphEmbedder(ILanguagePattern):
 
-    @staticmethod
-    def concat(left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
+    @classmethod
+    def concat(cls, left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
         right = right >> len(left)
 
         g = (DiGraphBuilder()
@@ -24,13 +24,13 @@ class DiGraphEmbedder(ILanguagePattern):
              .add_edge(left.last, right.head))
         return g | left | right
 
-    @staticmethod
-    def merge(left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
+    @classmethod
+    def merge(cls, left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
         right = right >> len(left) - 1
         return left | right
 
-    @staticmethod
-    def embed_in_if(condition: RuleContext, then_part: "IDiGraphBuilder"):
+    @classmethod
+    def embed_in_if(cls, condition: RuleContext, then_part: "IDiGraphBuilder"):
         g_head = 0
         g = DiGraphBuilder().add_node(g_head, value=[condition])
         then_part = then_part >> len(g)
@@ -41,8 +41,8 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (g_head, then_part.head, EdgeLabel.true.name),
                                  (then_part.last, g_last)])
 
-    @staticmethod
-    def embed_in_if_else(condition: RuleContext, then_part: "IDiGraphBuilder", else_part: "IDiGraphBuilder"):
+    @classmethod
+    def embed_in_if_else(cls, condition: RuleContext, then_part: "IDiGraphBuilder", else_part: "IDiGraphBuilder"):
         g_head = 0
         g = DiGraphBuilder().add_node(g_head, value=[condition])
         then_part = then_part >> len(g)
@@ -55,12 +55,12 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (then_part.last, g_last),
                                  (else_part.last, g_last)])
 
-    @staticmethod
-    def embed_in_switch_case(switcher: RuleContext, labels: List[RuleContext], bodies: List["IDiGraphBuilder"]):
+    @classmethod
+    def embed_in_switch_case(cls, switcher: RuleContext, labels: List[RuleContext], bodies: List["IDiGraphBuilder"]):
         pass
 
-    @staticmethod
-    def embed_in_while(condition: RuleContext, body: "IDiGraphBuilder"):
+    @classmethod
+    def embed_in_while(cls, condition: RuleContext, body: "IDiGraphBuilder"):
         g_head, g_condition = 0, 1
         g = DiGraphBuilder().add_nodes_from([(g_head, []),
                                              (g_condition, [condition])])
@@ -73,8 +73,8 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (g_condition, g_last, EdgeLabel.false.name),
                                  (body.last, g_condition)])
 
-    @staticmethod
-    def embed_in_do_while(condition: RuleContext, body: "IDiGraphBuilder"):
+    @classmethod
+    def embed_in_do_while(cls, condition: RuleContext, body: "IDiGraphBuilder"):
         g_head = 0
         g = DiGraphBuilder().add_node(g_head, [])
         body = body >> len(g)
@@ -88,8 +88,8 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (g_condition, body.head, EdgeLabel.true.name),
                                  (g_condition, g_last, EdgeLabel.false.name)])
 
-    @staticmethod
-    def embed_in_for(condition: RuleContext,
+    @classmethod
+    def embed_in_for(cls, condition: RuleContext,
                      initializer: RuleContext,
                      body: IDiGraphBuilder,
                      successor: RuleContext) -> IDiGraphBuilder:
@@ -100,8 +100,8 @@ class DiGraphEmbedder(ILanguagePattern):
 
         return g
 
-    @staticmethod
-    def embed_in_conditional_for(condition: RuleContext,
+    @classmethod
+    def embed_in_conditional_for(cls, condition: RuleContext,
                                  initializer: RuleContext,
                                  body: IDiGraphBuilder,
                                  successor: RuleContext) -> IDiGraphBuilder:
@@ -119,8 +119,8 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (g_condition, g_last, EdgeLabel.false.name), (body.last, g_successor),
                                  (g_successor, g_condition)])
 
-    @staticmethod
-    def embed_in_unconditional_for(initializer: RuleContext,
+    @classmethod
+    def embed_in_unconditional_for(cls, initializer: RuleContext,
                                    body: IDiGraphBuilder,
                                    successor: RuleContext) -> IDiGraphBuilder:
         g_head = 0
@@ -134,8 +134,8 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (body.last, g_succsessor),
                                  (g_succsessor, body.head)])
 
-    @staticmethod
-    def embed_in_try_catch(body: "IDiGraphBuilder", exceptions: List[RuleContext],
+    @classmethod
+    def embed_in_try_catch(cls, body: "IDiGraphBuilder", exceptions: List[RuleContext],
                            catch_bodies: List["IDiGraphBuilder"]):
         pass
 
@@ -149,6 +149,9 @@ class DiGraphEmbedder(ILanguagePattern):
             print(new_end)
             g.remove_node(body.last)
 
+    @classmethod
+    def embed_in_function(cls, body: "IDiGraphBuilder"):
+        # todo: return and resolve null nodes
         end = body.last + 1
         g = DiGraphBuilder()
         g = g | body
