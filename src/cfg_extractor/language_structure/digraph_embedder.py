@@ -86,10 +86,12 @@ class DiGraphEmbedder(ILanguagePattern):
         g.add_nodes_from([(g_condition, [condition]),
                           (g_last, [])])
         g = g | body
-        return g.add_edges_from([(g_head, body.head),
-                                 (body.last, g_condition),
-                                 (g_condition, body.head, EdgeLabel.true.name),
-                                 (g_condition, g_last, EdgeLabel.false.name)])
+        g.add_edges_from([(g_head, body.head),
+                          (body.last, g_condition),
+                          (g_condition, body.head, EdgeLabel.true.name),
+                          (g_condition, g_last, EdgeLabel.false.name)])
+        g = cls.__split_on_continue(g, g_condition)
+        return cls.__split_on_break(g)
 
     @classmethod
     def embed_in_for(cls, condition: RuleContext,
