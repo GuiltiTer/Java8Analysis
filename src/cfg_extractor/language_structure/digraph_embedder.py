@@ -1,7 +1,7 @@
 from typing import List
 
 from antlr4 import RuleContext
-
+from itertools import accumulate
 from src.cfg_extractor.language_structure.structure_pattern_interface import ILanguagePattern
 from src.data_structures.graph.builder_interface import IDiGraphBuilder
 from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
@@ -58,7 +58,17 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @classmethod
     def embed_in_switch_case(cls, switcher: RuleContext, labels: List[RuleContext], bodies: List["IDiGraphBuilder"]):
-        pass
+        g_head = 0
+        g = DiGraphBuilder().add_node(g_head, value=[switcher] if switcher else [])
+        accumulated_lengths = list(accumulate(len(body) for body in bodies))
+        bodies = [body >> s + len(g) for body, s in zip(bodies, accumulated_lengths)]
+        g_last = bodies[-1].last + 1
+        for bodies_object in bodies:
+            g = g | bodies_object
+        g.add_node(g_last, value=[])
+        g.add_edges_from([(g_head, body.head, label.getText() if label else []) for label, body in zip(labels, bodies)])
+        g.add_edges_from([(body.last, body.last + 1) for label, body in zip(labels, bodies)])
+        return cls.__split_on_break(g)
 
     @classmethod
     def embed_in_while(cls, condition: RuleContext, body: "IDiGraphBuilder"):

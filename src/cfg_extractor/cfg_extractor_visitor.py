@@ -50,18 +50,18 @@ class CFGExtractorVisitor(JavaParserVisitor):
         else_part_graph = self.visit(else_part)
         return DiGraphEmbedder.embed_in_if_else(condition, then_part_graph, else_part_graph)
 
-    # def visitSwitchStatement(self, ctx: JavaParser.SwitchStatementContext):
-    #     condition = ctx.expression()
-    #     gin_by_case = self.visit(ctx.switchBlock())
-    #     return embed_in_switch_structure(gin_by_case, condition)
+    def visitSwitchStatement(self, ctx: JavaParser.SwitchStatementContext):
+        switcher = ctx.expression()
+        catch_labels, catch_bodies = zip(*self.visit(ctx.switchBlock()))
+        return DiGraphEmbedder.embed_in_switch_case(switcher, catch_labels, catch_bodies)
 
-    # def visitSwitchBlock(self, ctx: JavaParser.SwitchBlockContext):
-    #     return [self.visit(switch_group) for switch_group in ctx.switchBlockStatementGroup()]
+    def visitSwitchBlock(self, ctx: JavaParser.SwitchBlockContext):
+        return [self.visit(switch_group) for switch_group in ctx.switchBlockStatementGroup()]
 
-    # def visitSwitchBlockStatementGroup(self, ctx: JavaParser.SwitchBlockStatementGroupContext):
-    #     case = ctx.switchLabels()
-    #     block_graph = self.visit(ctx.blockStatements())
-    #     return case, block_graph
+    def visitSwitchBlockStatementGroup(self, ctx: JavaParser.SwitchBlockStatementGroupContext):
+        case = ctx.switchLabels()
+        block_graph = self.visit(ctx.blockStatements())
+        return case, block_graph
 
     def visitBasicForStatement(self, ctx: JavaParser.BasicForStatementContext):
         initializer = ctx.forInit()
