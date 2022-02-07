@@ -13,7 +13,7 @@ def draw_CFG(graph, filename, token_stream=None, format="png", verbose=True):
     gr = gv.Digraph(comment=filename, format=format, node_attr={"shape": "none"})
     gr.node("start", style="filled", fillcolor="#aaffaa", shape="oval", fontsize=FONT_SIZE)
 
-    for node, args in list(graph.nodes.data())[:-1]:
+    for node, args in list(graph.nodes.data()):
         block_contents = (stringify_block(args, token_stream) if verbose else stringify_block_lineno_only(args))
         gr.node(str(node), label=build_node_template(node, block_contents))
     gr.node(str(last_node(graph)), label="end", style="filled", fillcolor="#ffaaaa", shape="oval", fontsize=FONT_SIZE)
