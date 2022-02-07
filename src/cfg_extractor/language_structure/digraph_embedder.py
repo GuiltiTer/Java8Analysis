@@ -195,14 +195,14 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @classmethod
     def __direct_nodes_to_if(cls, graph: "IDiGraphBuilder",
-                             direction_reference,
-                             predicate):
+                             target_node,
+                             jump_statement):
         h = graph
         for label, data in graph.node_items:
             for ctx in data:
-                if predicate(ctx):
+                if jump_statement(ctx):
                     h.remove_edges_from([(label, successor) for successor in graph.successors(label)])
-                    h.add_edge(label, direction_reference)
+                    h.add_edge(label, target_node)
                     h[label] = data[:data.index(ctx)]
                     break
         return h
