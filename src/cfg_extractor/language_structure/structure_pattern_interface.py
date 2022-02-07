@@ -76,7 +76,7 @@ class ILanguagePattern(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def embed_in_try_catch(body: IDiGraphBuilder,
+    def embed_in_try_catch(try_body: IDiGraphBuilder,
                            exceptions: List[RuleContext],
                            catch_bodies: List[IDiGraphBuilder]) -> IDiGraphBuilder:
         """embed the body and catch graphs into a try-catch graph pattern"""

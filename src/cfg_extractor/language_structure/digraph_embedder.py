@@ -149,9 +149,23 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__split_on_continue(g, g_succsessor)
 
     @classmethod
-    def embed_in_try_catch(cls, body: "IDiGraphBuilder", exceptions: List[RuleContext],
+    def embed_in_try_catch(cls, try_body: "IDiGraphBuilder", exceptions: List[RuleContext],
                            catch_bodies: List["IDiGraphBuilder"]):
-        pass
+        g = DiGraphBuilder()
+        accumulated_lengths = list(accumulate(len(body) for body in catch_bodies))
+        catch_bodies = [body >> s + len(try_body) for body, s in zip(catch_bodies, accumulated_lengths)]
+        g = g | try_body
+        for label, data in g.node_items:
+            for ctx in data:
+                if is_throw(ctx):
+                    g = g | catch_bodies[0]
+                    g.remove_edges_from([(label, successor) for successor in g.successors(label)])
+                    catch = g.last
+                    g_last = len(g) + 1
+                    g.add_node(g_last, value=[]).add_edges_from([(label, catch), (catch, g_last)])
+                    g[label] = data[:data.index(ctx)]
+                    break
+        return g
 
     @classmethod
     def __resolve_null_node(cls, graph: IDiGraphBuilder, body, end):

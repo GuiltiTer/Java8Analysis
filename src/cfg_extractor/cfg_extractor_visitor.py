@@ -81,18 +81,18 @@ class CFGExtractorVisitor(JavaParserVisitor):
         do_body_graph = self.visit(do_body)
         return DiGraphEmbedder.embed_in_do_while(condition, do_body_graph)
 
-    # def visitTryStatement1(self, ctx: JavaParser.TryStatement1Context):
-    #     try_body = self.visit(ctx.block())
-    #     catches = self.visit(ctx.catches())
-    #     return embed_in_try_catch_structure(try_body, catches)
-    #
-    # def visitCatches(self, ctx: JavaParser.CatchesContext):
-    #     return [self.visit(catches) for catches in ctx.catchClause()]
-    #
-    # def visitCatchClause(self, ctx: JavaParser.CatchClauseContext):
-    #     catch_body = self.visit(ctx.block())
-    #     exception = self.visit(ctx.catchFormalParameter())
-    #     return exception, catch_body
+    def visitTryStatement1(self, ctx: JavaParser.TryStatement1Context):
+        try_body = self.visit(ctx.block())
+        catch_exceptions, catch_bodies = zip(*self.visit(ctx.catches()))
+        return DiGraphEmbedder.embed_in_try_catch(try_body, catch_exceptions, catch_bodies)
+
+    def visitCatches(self, ctx: JavaParser.CatchesContext):
+        return [self.visit(catches) for catches in ctx.catchClause()]
+
+    def visitCatchClause(self, ctx: JavaParser.CatchClauseContext):
+        catch_body = self.visit(ctx.block())
+        exception = ctx.catchFormalParameter()
+        return exception, catch_body
 
     def visitExpressionStatement(self, ctx: JavaParser.ExpressionStatementContext):
         return DiGraphBuilder().add_node(value=[ctx])
