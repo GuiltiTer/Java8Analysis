@@ -151,7 +151,9 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__split_on_continue(g, g_succsessor)
 
     @classmethod
-    def embed_in_try_catch(cls, try_body: "IDiGraphBuilder", exceptions: List[RuleContext],
+    def embed_in_try_catch(cls,
+                           try_body: "IDiGraphBuilder",
+                           exceptions: List[RuleContext],
                            catch_bodies: List["IDiGraphBuilder"]):
         g = DiGraphBuilder()
         accumulated_lengths = list(accumulate(len(body) for body in catch_bodies))
@@ -186,7 +188,6 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @classmethod
     def embed_in_function(cls, body: "IDiGraphBuilder"):
-        # todo: return and resolve null nodes
         end = body.last + 1
         g = DiGraphBuilder()
         g = g | body
@@ -210,7 +211,8 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__direct_nodes_to_if(graph, direction_reference, is_throw)
 
     @classmethod
-    def __direct_nodes_to_if(cls, graph: "IDiGraphBuilder",
+    def __direct_nodes_to_if(cls,
+                             graph: "IDiGraphBuilder",
                              target_node,
                              jump_statement):
         h = graph.copy()
