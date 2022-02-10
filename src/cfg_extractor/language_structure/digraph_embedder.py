@@ -211,7 +211,7 @@ class DiGraphEmbedder(ILanguagePattern):
     def __direct_nodes_to_if(cls, graph: "IDiGraphBuilder",
                              target_node,
                              jump_statement):
-        h = graph
+        h = graph.copy()
         for label, data in graph.node_items:
             for ctx in data:
                 if jump_statement(ctx):

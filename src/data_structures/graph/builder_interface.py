@@ -99,6 +99,10 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
     def as_dict(self) -> Dict:
         """get a dictionary presentation of graph"""
 
+    @abc.abstractmethod
+    def copy(self) -> "IDiGraphBuilder":
+        """return a deep copy of object"""
+
     def __or__(self, other: "IDiGraphBuilder") -> "IDiGraphBuilder":
         """compose graphs and merge graph data"""
 
