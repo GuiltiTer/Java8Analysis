@@ -68,7 +68,7 @@ class CFGExtractorVisitor(JavaParserVisitor):
         condition = ctx.expression()
         successor = ctx.forUpdate()
         body_graph = self.visit(ctx.statement())
-        return DiGraphEmbedder.embed_in_for(condition, initializer, body_graph, successor)
+        return DiGraphEmbedder.embed_in_for(condition, initializer, successor, body_graph)
 
     def visitWhileStatement(self, ctx: JavaParser.WhileStatementContext):
         condition = ctx.expression()

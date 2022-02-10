@@ -104,20 +104,21 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__split_on_break(g)
 
     @classmethod
-    def embed_in_for(cls, condition: RuleContext,
+    def embed_in_for(cls,
+                     condition,
                      initializer: RuleContext,
-                     body: IDiGraphBuilder,
-                     successor: RuleContext) -> IDiGraphBuilder:
-
-        g = DiGraphEmbedder.embed_in_conditional_for(condition, initializer, body, successor) if condition \
-            else DiGraphEmbedder.embed_in_unconditional_for(initializer, body, successor)
+                     successor: IDiGraphBuilder,
+                     body: RuleContext) -> IDiGraphBuilder:
+        g = (cls.__embed_in_conditional_for(condition, initializer, successor, body) if condition
+             else cls.__embed_in_unconditional_for(initializer, successor, body))
         return cls.__split_on_break(g)
 
     @classmethod
-    def embed_in_conditional_for(cls, condition: RuleContext,
-                                 initializer: RuleContext,
-                                 body: IDiGraphBuilder,
-                                 successor: RuleContext) -> IDiGraphBuilder:
+    def __embed_in_conditional_for(cls,
+                                   condition: RuleContext,
+                                   initializer: RuleContext,
+                                   successor: RuleContext,
+                                   body: IDiGraphBuilder) -> IDiGraphBuilder:
 
         g_head, g_condition = 0, 1
         g = DiGraphBuilder().add_nodes_from([(g_head, [initializer]),
@@ -133,9 +134,10 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__split_on_continue(g, g_successor)
 
     @classmethod
-    def embed_in_unconditional_for(cls, initializer: RuleContext,
-                                   body: IDiGraphBuilder,
-                                   successor: RuleContext) -> IDiGraphBuilder:
+    def __embed_in_unconditional_for(cls,
+                                     initializer: RuleContext,
+                                     successor: RuleContext,
+                                     body: IDiGraphBuilder) -> IDiGraphBuilder:
         g_head = 0
         g = DiGraphBuilder().add_node(g_head, [initializer] if initializer else [])
         body = body >> len(g)
