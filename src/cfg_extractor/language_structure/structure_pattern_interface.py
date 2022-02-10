@@ -7,81 +7,76 @@ from src.data_structures.graph.builder_interface import IDiGraphBuilder
 
 class ILanguagePattern(metaclass=abc.ABCMeta):
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def concat(left: IDiGraphBuilder,
+    def concat(cls,
+               left: IDiGraphBuilder,
                right: IDiGraphBuilder) -> IDiGraphBuilder:
         """concatenate two graphs sequentially"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def merge(left: IDiGraphBuilder,
+    def merge(cls,
+              left: IDiGraphBuilder,
               right: IDiGraphBuilder) -> IDiGraphBuilder:
         """merge two graphs affront nodes"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_if(condition: RuleContext,
+    def embed_in_if(cls,
+                    condition: RuleContext,
                     then_part: IDiGraphBuilder) -> IDiGraphBuilder:
         """embed the then part graph into an if graph pattern"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_if_else(condition: RuleContext,
+    def embed_in_if_else(cls,
+                         condition: RuleContext,
                          then_part: IDiGraphBuilder,
                          else_part: IDiGraphBuilder) -> IDiGraphBuilder:
         """embed the then part and else part graphs into an if-else graph pattern"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_switch_case(switcher: RuleContext,
+    def embed_in_switch_case(cls,
+                             switcher: RuleContext,
                              labels: List[RuleContext],
                              bodies: List[IDiGraphBuilder]) -> IDiGraphBuilder:
         """embed the body graphs into a switch-case graph pattern"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_while(condition: RuleContext,
+    def embed_in_while(cls,
+                       condition: RuleContext,
                        body: IDiGraphBuilder) -> IDiGraphBuilder:
         """embed the body graph into a while graph pattern"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_do_while(condition: RuleContext,
+    def embed_in_do_while(cls,
+                          condition: RuleContext,
                           body: IDiGraphBuilder) -> IDiGraphBuilder:
         """embed the body graph into a do-while graph pattern"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_for(condition: RuleContext,
+    def embed_in_for(cls,
+                     condition: RuleContext,
                      initializer: RuleContext,
-                     body: IDiGraphBuilder,
-                     successor: RuleContext) -> IDiGraphBuilder:
+                     successor: RuleContext,
+                     body: IDiGraphBuilder) -> IDiGraphBuilder:
         """embed the body graph into a for graph pattern"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_conditional_for(condition: RuleContext,
-                                 initializer: RuleContext,
-                                 body: IDiGraphBuilder,
-                                 successor: RuleContext) -> IDiGraphBuilder:
-        """embed the body graph into a conditional for graph pattern"""
-
-    @staticmethod
-    @abc.abstractmethod
-    def embed_in_unconditional_for(initializer: RuleContext,
-                                   body: IDiGraphBuilder,
-                                   successor: RuleContext) -> IDiGraphBuilder:
-        """embed the body graph into an unconditional for graph pattern"""
-
-    @staticmethod
-    @abc.abstractmethod
-    def embed_in_try_catch(try_body: IDiGraphBuilder,
+    def embed_in_try_catch(cls,
+                           try_body: IDiGraphBuilder,
                            exceptions: List[RuleContext],
                            catch_bodies: List[IDiGraphBuilder]) -> IDiGraphBuilder:
         """embed the body and catch graphs into a try-catch graph pattern"""
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def embed_in_function(body: IDiGraphBuilder) -> IDiGraphBuilder:
+    def embed_in_function(cls,
+                          body: IDiGraphBuilder) -> IDiGraphBuilder:
         """embed the body graph into a function graph pattern"""
