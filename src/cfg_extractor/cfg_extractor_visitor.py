@@ -1,3 +1,4 @@
+from functools import reduce
 from antlr.gen.JavaParser import JavaParser
 from antlr.gen.JavaParserVisitor import JavaParserVisitor
 from src.cfg_extractor.lang_structures import (embed_in_function_structure, embed_in_do_while_structure,
@@ -5,6 +6,8 @@ from src.cfg_extractor.lang_structures import (embed_in_function_structure, embe
                                                embed_in_if_structure, embed_in_if_else_structure,
                                                embed_in_while_structure, embed_in_try_catch_structure)
 from src.graph.utils import (build_single_node_graph, concat_graphs)
+from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
+from src.cfg_extractor.language_structure.digraph_embedder import DiGraphEmbedder
 
 
 class CFGExtractorVisitor(JavaParserVisitor):
@@ -24,41 +27,33 @@ class CFGExtractorVisitor(JavaParserVisitor):
 
     def visitMethodDeclaration(self, ctx: JavaParser.MethodDeclarationContext):
         gin = self.visit(ctx.methodBody())
-        self.functions[ctx] = embed_in_function_structure(gin)
+        self.functions[ctx] = DiGraphEmbedder.embed_in_function(gin).build()
 
     def visitBlock(self, ctx: JavaParser.BlockContext):
         return self.visit(ctx.blockStatements())
 
     def visitBlockStatements(self, ctx: JavaParser.BlockStatementsContext):
-        gins = []
-        for block in ctx.blockStatement():
-            if block is None:
-                break
-            gins.append(self.visit(block))
-        g = gins[0]
-        if len(gins) != 1:
-            for i in range(1, len(gins)):
-                g = concat_graphs(g, gins[i])
-        return g
+        gins = (self.visit(block) for block in ctx.blockStatement())
+        return reduce(DiGraphEmbedder.merge, gins)
 
     def visitIfThenStatement(self, ctx: JavaParser.IfThenStatementContext):
         condition = ctx.expression()
-        if_body = ctx.statement()
-        gin = self.visit(if_body)
-        return embed_in_if_structure(gin, condition)
+        then_part = ctx.statement()
+        then_part_graph = self.visit(then_part)
+        return DiGraphEmbedder.embed_in_if(condition, then_part_graph)
 
     def visitIfThenElseStatement(self, ctx: JavaParser.IfThenElseStatementContext):
         condition = ctx.expression()
-        if_body = ctx.statementNoShortIf()
-        else_body = ctx.statement()
-        gin_if = self.visit(if_body)
-        gin_else = self.visit(else_body)
-        return embed_in_if_else_structure(gin_if, gin_else, condition)
+        then_part = ctx.statementNoShortIf()
+        else_part = ctx.statement()
+        then_part_graph = self.visit(then_part)
+        else_part_graph = self.visit(else_part)
+        return DiGraphEmbedder.embed_in_if_else(condition, then_part_graph, else_part_graph)
 
     def visitSwitchStatement(self, ctx: JavaParser.SwitchStatementContext):
-        condition = ctx.expression()
-        gin_by_case = self.visit(ctx.switchBlock())
-        return embed_in_switch_structure(gin_by_case, condition)
+        switcher = ctx.expression()
+        catch_labels, catch_bodies = zip(*self.visit(ctx.switchBlock()))
+        return DiGraphEmbedder.embed_in_switch_case(switcher, catch_labels, catch_bodies)
 
     def visitSwitchBlock(self, ctx: JavaParser.SwitchBlockContext):
         return [self.visit(switch_group) for switch_group in ctx.switchBlockStatementGroup()]
@@ -69,68 +64,53 @@ class CFGExtractorVisitor(JavaParserVisitor):
         return case, block_graph
 
     def visitBasicForStatement(self, ctx: JavaParser.BasicForStatementContext):
-        init = ctx.forInit()
+        initializer = ctx.forInit()
         condition = ctx.expression()
-        succsessor = ctx.forUpdate()
-        for_body = ctx.statement()
-        gin = self.visit(for_body)
-        return embed_in_for_structure(gin, init, condition, succsessor)
+        successor = ctx.forUpdate()
+        body_graph = self.visit(ctx.statement())
+        return DiGraphEmbedder.embed_in_for(condition, initializer, successor, body_graph)
 
     def visitWhileStatement(self, ctx: JavaParser.WhileStatementContext):
         condition = ctx.expression()
-        gin = self.visit(ctx.statement())
-        return embed_in_while_structure(gin, condition)
+        body_graph = self.visit(ctx.statement())
+        return DiGraphEmbedder.embed_in_while(condition, body_graph)
 
     def visitDoStatement(self, ctx: JavaParser.DoStatementContext):
         condition = ctx.expression()
-        gin = self.visit(ctx.statement())
-        return embed_in_do_while_structure(gin, condition)
+        do_body = ctx.statement()
+        do_body_graph = self.visit(do_body)
+        return DiGraphEmbedder.embed_in_do_while(condition, do_body_graph)
 
     def visitTryStatement1(self, ctx: JavaParser.TryStatement1Context):
         try_body = self.visit(ctx.block())
-        catches = self.visit(ctx.catches())
-        return embed_in_try_catch_structure(try_body, catches)
+        catch_exceptions, catch_bodies = zip(*self.visit(ctx.catches()))
+        return DiGraphEmbedder.embed_in_try_catch(try_body, catch_exceptions, catch_bodies)
 
     def visitCatches(self, ctx: JavaParser.CatchesContext):
         return [self.visit(catches) for catches in ctx.catchClause()]
 
     def visitCatchClause(self, ctx: JavaParser.CatchClauseContext):
         catch_body = self.visit(ctx.block())
-        exeption = self.visit(ctx.catchFormalParameter())
-        return exeption, catch_body
-
-    def visitCatchFormalParameter(self, ctx: JavaParser.CatchFormalParameterContext):
-        return build_single_node_graph(ctx)
+        exception = ctx.catchFormalParameter()
+        return exception, catch_body
 
     def visitExpressionStatement(self, ctx: JavaParser.ExpressionStatementContext):
-        return build_single_node_graph(ctx)
+        return DiGraphBuilder().add_node(value=[ctx])
 
     def visitLocalVariableDeclarationStatement(self, ctx: JavaParser.LocalVariableDeclarationStatementContext):
-        return build_single_node_graph(ctx)
-
-    def visitSwitchLabel1(self, ctx: JavaParser.SwitchLabel1Context):
-        return self.visit(ctx.constantExpression())
-
-    def visitSwitchLabel3(self, ctx: JavaParser.SwitchLabel3Context):
-        return build_single_node_graph(ctx)
-
-    def visitConstantExpression(self, ctx: JavaParser.ConstantExpressionContext):
-        return build_single_node_graph(ctx)
+        return DiGraphBuilder().add_node(value=[ctx])
 
     def visitBreakStatement(self, ctx: JavaParser.BreakStatementContext):
-        return build_single_node_graph(ctx)
+        return DiGraphBuilder().add_node(value=[ctx])
 
     def visitLocalVariableDeclaration(self, ctx: JavaParser.LocalVariableDeclarationContext):
-        return build_single_node_graph(ctx)
-
-    def visitPostIncrementExpression(self, ctx: JavaParser.PostIncrementExpressionContext):
-        return build_single_node_graph(ctx)
+        return DiGraphBuilder().add_node(value=[ctx])
 
     def visitContinueStatement(self, ctx: JavaParser.ContinueStatementContext):
-        return build_single_node_graph(ctx)
+        return DiGraphBuilder().add_node(value=[ctx])
 
     def visitThrowStatement(self, ctx: JavaParser.ThrowStatementContext):
-        return build_single_node_graph(ctx)
+        return DiGraphBuilder().add_node(value=[ctx])
 
     def visitReturnStatement(self, ctx: JavaParser.ReturnStatementContext):
-        return build_single_node_graph(ctx)
+        return DiGraphBuilder().add_node(value=[ctx])

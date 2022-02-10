@@ -1,9 +1,10 @@
 class a{
     int main(){
         int i = 0;
-        while (i < 5) {
+        do{
             System.out.println(i);
             i++;
         }
+        while (i < 5);
     }
 }
