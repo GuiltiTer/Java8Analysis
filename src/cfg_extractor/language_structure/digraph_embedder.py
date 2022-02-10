@@ -190,7 +190,7 @@ class DiGraphEmbedder(ILanguagePattern):
         end = body.last + 1
         g = DiGraphBuilder()
         g = g | body
-        g = DiGraphEmbedder.__split_on_return(g)
+        g = cls.__split_on_return(g)
         return cls.__resolve_null_node(g, body, end)
 
     @classmethod
