@@ -141,14 +141,14 @@ class DiGraphEmbedder(ILanguagePattern):
         g_head = 0
         g = DiGraphBuilder().add_node(g_head, [initializer] if initializer else [])
         body = body >> len(g)
-        g_succsessor = body.last + 1
-        g_last = g_succsessor + 1
-        g.add_nodes_from([(g_last, []), (g_succsessor, [successor] if successor else [])])
+        g_successor = body.last + 1
+        g_last = g_successor + 1
+        g.add_nodes_from([(g_last, []), (g_successor, [successor] if successor else [])])
         g = g | body
         g.add_edges_from([(g_head, body.head),
-                          (body.last, g_succsessor),
-                          (g_succsessor, body.head)])
-        return cls.__split_on_continue(g, g_succsessor)
+                          (body.last, g_successor),
+                          (g_successor, body.head)])
+        return cls.__split_on_continue(g, g_successor)
 
     @classmethod
     def embed_in_try_catch(cls,
