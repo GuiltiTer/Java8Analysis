@@ -103,6 +103,10 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
     def copy(self) -> "IDiGraphBuilder":
         """return a deep copy of object"""
 
+    @abc.abstractmethod
+    def reversed(self):
+        """return a reversed view of graph"""
+
     def __or__(self, other: "IDiGraphBuilder") -> "IDiGraphBuilder":
         """compose graphs and merge graph data"""
 
