@@ -1,6 +1,7 @@
 from functools import reduce
-from antlr.gen.JavaParser import JavaParser
-from antlr.gen.JavaParserVisitor import JavaParserVisitor
+from antlr4 import ParserRuleContext
+from src.antlr.gen.JavaParser import JavaParser
+from src.antlr.gen.JavaParserVisitor import JavaParserVisitor
 from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
 from src.cfg.language_structure.digraph_embedder import DiGraphEmbedder
 
@@ -19,6 +20,12 @@ class CFGExtractorVisitor(JavaParserVisitor):
         Each CFG is kept as a `networkx.DiGraph`.
         """
         self.functions = {}
+
+    def extract(self, ctx: ParserRuleContext) -> dict:
+        self.visit(ctx)
+        functions_by_cfgs = self.functions
+        self.functions = {}
+        return functions_by_cfgs
 
     def visitMethodDeclaration(self, ctx: JavaParser.MethodDeclarationContext):
         gin = self.visit(ctx.methodBody())
