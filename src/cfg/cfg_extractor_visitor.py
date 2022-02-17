@@ -1,9 +1,13 @@
 from functools import reduce
+from typing import Dict
+
 from antlr4 import ParserRuleContext
+
 from src.antlr.gen.JavaParser import JavaParser
 from src.antlr.gen.JavaParserVisitor import JavaParserVisitor
-from src.data_structures.graph.networkx_graph import NxGraph as Graph
 from src.cfg.language_structure.digraph_embedder import DiGraphEmbedder
+from src.data_structures.graph.graph_interface import IGraph
+from src.data_structures.graph.networkx_graph import NxGraph as Graph
 
 
 class CFGExtractorVisitor(JavaParserVisitor):
@@ -21,7 +25,7 @@ class CFGExtractorVisitor(JavaParserVisitor):
         """
         self.functions = {}
 
-    def extract(self, ctx: ParserRuleContext) -> dict:
+    def extract(self, ctx: ParserRuleContext) -> Dict[ParserRuleContext, IGraph]:
         self.visit(ctx)
         functions_by_cfgs = self.functions
         self.functions = {}
