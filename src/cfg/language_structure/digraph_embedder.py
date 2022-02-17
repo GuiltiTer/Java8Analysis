@@ -2,7 +2,7 @@ from typing import List
 
 from antlr4 import RuleContext
 from itertools import accumulate
-from src.cfg_extractor.language_structure.structure_pattern_interface import ILanguagePattern
+from src.cfg.language_structure.structure_pattern_interface import ILanguagePattern
 from src.data_structures.graph.builder_interface import IDiGraphBuilder
 from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
 from enum import Enum, auto

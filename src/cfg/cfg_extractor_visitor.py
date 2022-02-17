@@ -1,13 +1,8 @@
 from functools import reduce
 from antlr.gen.JavaParser import JavaParser
 from antlr.gen.JavaParserVisitor import JavaParserVisitor
-from src.cfg_extractor.lang_structures import (embed_in_function_structure, embed_in_do_while_structure,
-                                               embed_in_for_structure, embed_in_switch_structure,
-                                               embed_in_if_structure, embed_in_if_else_structure,
-                                               embed_in_while_structure, embed_in_try_catch_structure)
-from src.graph.utils import (build_single_node_graph, concat_graphs)
 from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
-from src.cfg_extractor.language_structure.digraph_embedder import DiGraphEmbedder
+from src.cfg.language_structure.digraph_embedder import DiGraphEmbedder
 
 
 class CFGExtractorVisitor(JavaParserVisitor):
