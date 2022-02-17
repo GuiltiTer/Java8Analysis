@@ -27,7 +27,7 @@ class CFGExtractorVisitor(JavaParserVisitor):
 
     def visitMethodDeclaration(self, ctx: JavaParser.MethodDeclarationContext):
         gin = self.visit(ctx.methodBody())
-        self.functions[ctx] = DiGraphEmbedder.embed_in_function(gin).build()
+        self.functions[ctx] = DiGraphEmbedder.embed_in_function(gin)
 
     def visitBlock(self, ctx: JavaParser.BlockContext):
         return self.visit(ctx.blockStatements())
