@@ -108,6 +108,14 @@ class NxDiGraphBuilder(IDiGraphBuilder):
         g.__graph = self.__graph.copy()
         return g
 
+    def reversed(self):
+        rev_graph: nx.DiGraph = nx.relabel_nodes(self.__graph,
+                                                 {old: new for new, old in
+                                                  enumerate(sorted(self.node_keys, reverse=True))}).reverse(copy=False)
+        rev = NxDiGraphBuilder()
+        rev.__graph = rev_graph
+        return rev
+
     def __or__(self, other):
         common_nodes = set(self.node_keys) & set(other.node_keys)
         common_data_by_nodes = [(node, self[node] + other[node]) for node in common_nodes]
