@@ -173,17 +173,20 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @classmethod
     def __resolve_null_node(cls, graph: IDiGraphBuilder, body, end):
-        if body[body.last] == []:
-            end -= 1
-            predecessors = []
-            for data in body.as_dict()['edges']:
-                if data[0][1] == body.last:
-                    predecessors.append((data[0][0], data[1]))
-            body.remove_node(body.last)
-            for predecessor in predecessors:
-                graph.add_edge(predecessor[0], end, predecessor[1])
-        else:
-            graph.add_node(end, value=[]).add_edge(body.last, end)
+        null_node = []
+        edge_lable = []
+        for label, data in graph.node_items:
+            if data == []:
+                null_node.append(label)
+        for lable in null_node[:-1]:
+            for data in graph.as_dict()['edges']:
+                if data[0][1] == lable:
+                    print(graph.as_dict()['edges'])
+                    print(data[1])
+                    edge_lable.append(data[1])
+            if graph.successors(lable):
+                graph.add_edges_from([(predecessor, successor, edge_label) for predecessor, successor, edge_label in zip(graph.predecessors(lable), graph.successors(lable), edge_lable)])
+            graph.remove_node(lable)
         return graph
 
     @classmethod
