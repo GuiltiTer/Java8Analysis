@@ -1,4 +1,5 @@
-from antlr4 import CommonTokenStream, StdinStream, FileStream
+from antlr4 import CommonTokenStream, StdinStream, FileStream, InputStream
+
 from src.antlr.gen.JavaLexer import JavaLexer
 from src.antlr.gen.JavaParser import JavaParser
 from src.cfg.cfg_extractor_visitor import CFGExtractorVisitor
@@ -14,6 +15,10 @@ class CFGExtractor:
 
     def from_stdin(self):
         stream = StdinStream()
+        return self.__extract(stream)
+
+    def from_string(self, source_code):
+        stream = InputStream(source_code)
         return self.__extract(stream)
 
     def __extract(self, stream):
