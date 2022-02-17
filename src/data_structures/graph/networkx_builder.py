@@ -56,7 +56,7 @@ class NxDiGraphBuilder(IDiGraphBuilder):
 
     def predecessors(self, node: int):
         for predecessor in self.__graph.predecessors(node):
-            return predecessor
+            yield predecessor
 
     def remove_node(self, node):
         self.__graph.remove_node(node)
