@@ -3,8 +3,8 @@ from typing import List
 from antlr4 import RuleContext
 from itertools import accumulate
 from src.cfg.language_structure.structure_pattern_interface import ILanguagePattern
-from src.data_structures.graph.builder_interface import IDiGraphBuilder
-from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
+from src.data_structures.graph.graph_interface import IGraph
+from src.data_structures.graph.networkx_graph import NxGraph as Graph
 from enum import Enum, auto
 from src.antlr.rule_utils import is_break, is_return, is_continue, is_throw
 
@@ -17,23 +17,23 @@ class EdgeLabel(Enum):
 class DiGraphEmbedder(ILanguagePattern):
 
     @classmethod
-    def concat(cls, left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
+    def concat(cls, left: IGraph, right: IGraph) -> IGraph:
         right = right >> len(left)
 
-        g = (DiGraphBuilder()
+        g = (Graph()
              .add_nodes_from([(left.last, []), (right.head, [])])
              .add_edge(left.last, right.head))
         return g | left | right
 
     @classmethod
-    def merge(cls, left: IDiGraphBuilder, right: IDiGraphBuilder) -> IDiGraphBuilder:
+    def merge(cls, left: IGraph, right: IGraph) -> IGraph:
         right = right >> len(left) - 1
         return left | right
 
     @classmethod
-    def embed_in_if(cls, condition: RuleContext, then_part: "IDiGraphBuilder"):
+    def embed_in_if(cls, condition: RuleContext, then_part: "IGraph"):
         g_head = 0
-        g = DiGraphBuilder().add_node(g_head, value=[condition])
+        g = Graph().add_node(g_head, value=[condition])
         then_part = then_part >> len(g)
         g_last = then_part.last + 1
         g.add_node(g_last, value=[])
@@ -43,9 +43,9 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (then_part.last, g_last)])
 
     @classmethod
-    def embed_in_if_else(cls, condition: RuleContext, then_part: "IDiGraphBuilder", else_part: "IDiGraphBuilder"):
+    def embed_in_if_else(cls, condition: RuleContext, then_part: "IGraph", else_part: "IGraph"):
         g_head = 0
-        g = DiGraphBuilder().add_node(g_head, value=[condition])
+        g = Graph().add_node(g_head, value=[condition])
         then_part = then_part >> len(g)
         else_part = else_part >> len(g) + len(then_part)
         g_last = else_part.last + 1
@@ -57,9 +57,9 @@ class DiGraphEmbedder(ILanguagePattern):
                                  (else_part.last, g_last)])
 
     @classmethod
-    def embed_in_switch_case(cls, switcher: RuleContext, labels: List[RuleContext], bodies: List["IDiGraphBuilder"]):
+    def embed_in_switch_case(cls, switcher: RuleContext, labels: List[RuleContext], bodies: List["IGraph"]):
         g_head = 0
-        g = DiGraphBuilder().add_node(g_head, value=[switcher] if switcher else [])
+        g = Graph().add_node(g_head, value=[switcher] if switcher else [])
         accumulated_lengths = list(accumulate(len(body) for body in bodies))
         bodies = [body >> s + len(g) for body, s in zip(bodies, accumulated_lengths)]
         g_last = bodies[-1].last + 1
@@ -71,10 +71,10 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__split_on_break(g)
 
     @classmethod
-    def embed_in_while(cls, condition: RuleContext, body: "IDiGraphBuilder"):
+    def embed_in_while(cls, condition: RuleContext, body: "IGraph"):
         g_head, g_condition = 0, 1
-        g = DiGraphBuilder().add_nodes_from([(g_head, []),
-                                             (g_condition, [condition])])
+        g = Graph().add_nodes_from([(g_head, []),
+                                    (g_condition, [condition])])
         body = body >> len(g)
         g_last = body.last + 1
         g.add_node(g_last, value=[])
@@ -87,9 +87,9 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__split_on_break(g)
 
     @classmethod
-    def embed_in_do_while(cls, condition: RuleContext, body: "IDiGraphBuilder"):
+    def embed_in_do_while(cls, condition: RuleContext, body: "IGraph"):
         g_head = 0
-        g = DiGraphBuilder().add_node(g_head, [])
+        g = Graph().add_node(g_head, [])
         body = body >> len(g)
         g_condition = body.last + 1
         g_last = g_condition + 1
@@ -107,8 +107,8 @@ class DiGraphEmbedder(ILanguagePattern):
     def embed_in_for(cls,
                      condition,
                      initializer: RuleContext,
-                     successor: IDiGraphBuilder,
-                     body: RuleContext) -> IDiGraphBuilder:
+                     successor: IGraph,
+                     body: RuleContext) -> IGraph:
         g = (cls.__embed_in_conditional_for(condition, initializer, successor, body) if condition
              else cls.__embed_in_unconditional_for(initializer, successor, body))
         return cls.__split_on_break(g)
@@ -118,11 +118,11 @@ class DiGraphEmbedder(ILanguagePattern):
                                    condition: RuleContext,
                                    initializer: RuleContext,
                                    successor: RuleContext,
-                                   body: IDiGraphBuilder) -> IDiGraphBuilder:
+                                   body: IGraph) -> IGraph:
 
         g_head, g_condition = 0, 1
-        g = DiGraphBuilder().add_nodes_from([(g_head, [initializer]),
-                                             (g_condition, [condition])])
+        g = Graph().add_nodes_from([(g_head, [initializer]),
+                                    (g_condition, [condition])])
         body = body >> len(g)
         g_successor = body.last + 1
         g_last = g_successor + 1
@@ -137,9 +137,9 @@ class DiGraphEmbedder(ILanguagePattern):
     def __embed_in_unconditional_for(cls,
                                      initializer: RuleContext,
                                      successor: RuleContext,
-                                     body: IDiGraphBuilder) -> IDiGraphBuilder:
+                                     body: IGraph) -> IGraph:
         g_head = 0
-        g = DiGraphBuilder().add_node(g_head, [initializer] if initializer else [])
+        g = Graph().add_node(g_head, [initializer] if initializer else [])
         body = body >> len(g)
         g_successor = body.last + 1
         g_last = g_successor + 1
@@ -152,10 +152,10 @@ class DiGraphEmbedder(ILanguagePattern):
 
     @classmethod
     def embed_in_try_catch(cls,
-                           try_body: "IDiGraphBuilder",
+                           try_body: "IGraph",
                            exceptions: List[RuleContext],
-                           catch_bodies: List["IDiGraphBuilder"]):
-        g = DiGraphBuilder()
+                           catch_bodies: List["IGraph"]):
+        g = Graph()
         accumulated_lengths = list(accumulate(len(body) for body in catch_bodies))
         catch_bodies = [body >> s + len(try_body) for body, s in zip(catch_bodies, accumulated_lengths)]
         g = g | try_body
@@ -172,7 +172,7 @@ class DiGraphEmbedder(ILanguagePattern):
         return g
 
     @classmethod
-    def __resolve_null_node(cls, graph: IDiGraphBuilder, body, end):
+    def __resolve_null_node(cls, graph: IGraph, body, end):
         null_node = []
         edge_label = []
         for label, data in graph.node_items:
@@ -189,32 +189,32 @@ class DiGraphEmbedder(ILanguagePattern):
         return graph
 
     @classmethod
-    def embed_in_function(cls, body: "IDiGraphBuilder"):
+    def embed_in_function(cls, body: "IGraph"):
         end = body.last + 1
-        g = DiGraphBuilder()
+        g = Graph()
         g = g | body
         g = cls.__split_on_return(g)
         return cls.__resolve_null_node(g, body, end)
 
     @classmethod
-    def __split_on_return(cls, graph: IDiGraphBuilder):
+    def __split_on_return(cls, graph: IGraph):
         return cls.__direct_nodes_to_if(graph, graph.last, is_return)
 
     @classmethod
-    def __split_on_continue(cls, graph: "IDiGraphBuilder", direction_reference):
+    def __split_on_continue(cls, graph: "IGraph", direction_reference):
         return cls.__direct_nodes_to_if(graph, direction_reference, is_continue)
 
     @classmethod
-    def __split_on_break(cls, graph: "IDiGraphBuilder"):
+    def __split_on_break(cls, graph: "IGraph"):
         return cls.__direct_nodes_to_if(graph, graph.last, is_break)
 
     @classmethod
-    def __split_on_throw(cls, graph: "IDiGraphBuilder", direction_reference):
+    def __split_on_throw(cls, graph: "IGraph", direction_reference):
         return cls.__direct_nodes_to_if(graph, direction_reference, is_throw)
 
     @classmethod
     def __direct_nodes_to_if(cls,
-                             graph: "IDiGraphBuilder",
+                             graph: "IGraph",
                              target_node,
                              jump_statement):
         h = graph.copy()

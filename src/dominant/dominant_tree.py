@@ -1,24 +1,25 @@
 from functools import reduce, cached_property
 from typing import Dict
 
-from data_structures.graph.networkx_builder import NxDiGraphBuilder as DigraphBuilder
+from data_structures.graph.graph_interface import IGraph
+from src.data_structures.graph.networkx_graph import NxGraph as Graph
 
 
 class DominantTree:
-    def __init__(self, cfg: DigraphBuilder):
+    def __init__(self, cfg: IGraph):
         self.__cfg = cfg
 
     @cached_property
-    def dominant_tree(self) -> DigraphBuilder:
+    def dominant_tree(self) -> IGraph:
         return self.__build_dominant_tree(self.__cfg)
 
     @cached_property
-    def post_dominant_tree(self) -> DigraphBuilder:
+    def post_dominant_tree(self) -> IGraph:
         return self.__build_dominant_tree(self.__cfg.reversed())
 
     @classmethod
-    def __build_dominant_tree(cls, cfg: DigraphBuilder) -> DigraphBuilder:
-        g = DigraphBuilder()
+    def __build_dominant_tree(cls, cfg: IGraph) -> IGraph:
+        g = Graph()
         dominants = cls.get_dominants(cfg)
         dominants = {n: doms - {n} for n, doms in dominants.items()}
         q = [cfg.head]
@@ -36,7 +37,7 @@ class DominantTree:
         return g
 
     @classmethod
-    def get_dominants(cls, cfg: DigraphBuilder) -> Dict[int, set]:
+    def get_dominants(cls, cfg: IGraph) -> Dict[int, set]:
         dominants = {cfg.head: {cfg.head}}
         other_than_head = set(cfg.node_keys) - {cfg.head}
         dominants.update({node: set(cfg.node_keys) for node in other_than_head})

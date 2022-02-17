@@ -3,13 +3,13 @@ import html
 import graphviz as gv
 
 from src.antlr.rule_utils import extract_exact_text
-from src.data_structures.graph.builder_interface import IDiGraphBuilder
+from src.data_structures.graph.graph_interface import IGraph
 
 FONT_SIZE = "22"
 PEN_WIDTH = "2"
 
 
-def draw_CFG(graph: IDiGraphBuilder, filename, token_stream=None, format="png", verbose=True):
+def draw_CFG(graph: IGraph, filename, token_stream=None, format="png", verbose=True):
     gr = gv.Digraph(comment=filename, format=format, node_attr={"shape": "none"})
     gr.node("start", style="filled", fillcolor="#aaffaa", shape="oval", fontsize=FONT_SIZE)
 

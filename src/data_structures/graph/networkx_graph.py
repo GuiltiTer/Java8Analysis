@@ -1,10 +1,10 @@
 import networkx as nx
 from networkx import DiGraph
 
-from src.data_structures.graph.builder_interface import IDiGraphBuilder
+from src.data_structures.graph.graph_interface import IGraph
 
 
-class NxDiGraphBuilder(IDiGraphBuilder):
+class NxGraph(IGraph):
     VALUE = "value"
 
     def __init__(self):
@@ -103,8 +103,8 @@ class NxDiGraphBuilder(IDiGraphBuilder):
     def as_dict(self):
         return {"nodes": list(self.node_items), "edges": list(self.edge_items)}
 
-    def copy(self) -> "IDiGraphBuilder":
-        g = NxDiGraphBuilder()
+    def copy(self) -> "IGraph":
+        g = NxGraph()
         g.__graph = self.__graph.copy()
         return g
 
@@ -112,7 +112,7 @@ class NxDiGraphBuilder(IDiGraphBuilder):
         rev_graph: nx.DiGraph = nx.relabel_nodes(self.__graph,
                                                  {old: new for new, old in
                                                   enumerate(sorted(self.node_keys, reverse=True))}).reverse(copy=False)
-        rev = NxDiGraphBuilder()
+        rev = NxGraph()
         rev.__graph = rev_graph
         return rev
 
@@ -120,14 +120,14 @@ class NxDiGraphBuilder(IDiGraphBuilder):
         common_nodes = set(self.node_keys) & set(other.node_keys)
         common_data_by_nodes = [(node, self[node] + other[node]) for node in common_nodes]
 
-        g = NxDiGraphBuilder()
+        g = NxGraph()
         g.__graph = nx.compose(other.__graph, self.__graph)
         for node, data in common_data_by_nodes:
             g[node] = data
         return g
 
     def __rshift__(self, n):
-        g = NxDiGraphBuilder()
+        g = NxGraph()
         g.__graph = nx.relabel_nodes(self.__graph, {i: i + n for i in self.__graph.nodes})
         return g
 

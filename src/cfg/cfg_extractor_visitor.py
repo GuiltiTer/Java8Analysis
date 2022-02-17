@@ -2,7 +2,7 @@ from functools import reduce
 from antlr4 import ParserRuleContext
 from src.antlr.gen.JavaParser import JavaParser
 from src.antlr.gen.JavaParserVisitor import JavaParserVisitor
-from src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
+from src.data_structures.graph.networkx_graph import NxGraph as Graph
 from src.cfg.language_structure.digraph_embedder import DiGraphEmbedder
 
 
@@ -97,22 +97,22 @@ class CFGExtractorVisitor(JavaParserVisitor):
         return exception, catch_body
 
     def visitExpressionStatement(self, ctx: JavaParser.ExpressionStatementContext):
-        return DiGraphBuilder().add_node(value=[ctx])
+        return Graph().add_node(value=[ctx])
 
     def visitLocalVariableDeclarationStatement(self, ctx: JavaParser.LocalVariableDeclarationStatementContext):
-        return DiGraphBuilder().add_node(value=[ctx])
+        return Graph().add_node(value=[ctx])
 
     def visitBreakStatement(self, ctx: JavaParser.BreakStatementContext):
-        return DiGraphBuilder().add_node(value=[ctx])
+        return Graph().add_node(value=[ctx])
 
     def visitLocalVariableDeclaration(self, ctx: JavaParser.LocalVariableDeclarationContext):
-        return DiGraphBuilder().add_node(value=[ctx])
+        return Graph().add_node(value=[ctx])
 
     def visitContinueStatement(self, ctx: JavaParser.ContinueStatementContext):
-        return DiGraphBuilder().add_node(value=[ctx])
+        return Graph().add_node(value=[ctx])
 
     def visitThrowStatement(self, ctx: JavaParser.ThrowStatementContext):
-        return DiGraphBuilder().add_node(value=[ctx])
+        return Graph().add_node(value=[ctx])
 
     def visitReturnStatement(self, ctx: JavaParser.ReturnStatementContext):
-        return DiGraphBuilder().add_node(value=[ctx])
+        return Graph().add_node(value=[ctx])

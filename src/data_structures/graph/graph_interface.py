@@ -2,7 +2,7 @@ import abc
 from typing import List, Tuple, Any, Dict, Union, Iterable
 
 
-class IDiGraphBuilder(metaclass=abc.ABCMeta):
+class IGraph(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def node_keys(self) -> Iterable[int]:
@@ -52,39 +52,39 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
         """predecessors of a given node"""
 
     @abc.abstractmethod
-    def add_node(self, node: int, value: Any = None) -> "IDiGraphBuilder":
+    def add_node(self, node: int, value: Any = None) -> "IGraph":
         """add a node"""
 
     @abc.abstractmethod
-    def remove_node(self, node: int) -> "IDiGraphBuilder":
+    def remove_node(self, node: int) -> "IGraph":
         """remove a node"""
 
     @abc.abstractmethod
-    def add_nodes_from(self, nodes: List) -> "IDiGraphBuilder":
+    def add_nodes_from(self, nodes: List) -> "IGraph":
         """add a set of nodes"""
 
     @abc.abstractmethod
-    def remove_nodes_from(self, nodes: List) -> "IDiGraphBuilder":
+    def remove_nodes_from(self, nodes: List) -> "IGraph":
         """remove a set of nodes"""
 
     @abc.abstractmethod
-    def add_edge(self, f: int, t: int, value: Any = None) -> "IDiGraphBuilder":
+    def add_edge(self, f: int, t: int, value: Any = None) -> "IGraph":
         """add an edge"""
 
     @abc.abstractmethod
-    def remove_edge(self, f: int, t: int) -> "IDiGraphBuilder":
+    def remove_edge(self, f: int, t: int) -> "IGraph":
         """remove an edge"""
 
     @abc.abstractmethod
-    def add_edges_from(self, edges: List) -> "IDiGraphBuilder":
+    def add_edges_from(self, edges: List) -> "IGraph":
         """add a set of edges"""
 
     @abc.abstractmethod
-    def remove_edges_from(self, edges: List) -> "IDiGraphBuilder":
+    def remove_edges_from(self, edges: List) -> "IGraph":
         """remove a set of edges"""
 
     @abc.abstractmethod
-    def compose(self, graph: "IDiGraphBuilder") -> None:
+    def compose(self, graph: "IGraph") -> None:
         """compose (union) with a graph"""
 
     @abc.abstractmethod
@@ -100,18 +100,18 @@ class IDiGraphBuilder(metaclass=abc.ABCMeta):
         """get a dictionary presentation of graph"""
 
     @abc.abstractmethod
-    def copy(self) -> "IDiGraphBuilder":
+    def copy(self) -> "IGraph":
         """return a deep copy of object"""
 
     @abc.abstractmethod
     def reversed(self):
         """return a reversed view of graph"""
 
-    def __or__(self, other: "IDiGraphBuilder") -> "IDiGraphBuilder":
+    def __or__(self, other: "IGraph") -> "IGraph":
         """compose graphs and merge graph data"""
 
     @abc.abstractmethod
-    def __rshift__(self, n: int) -> "IDiGraphBuilder":
+    def __rshift__(self, n: int) -> "IGraph":
         """shift right the nodes"""
 
     @abc.abstractmethod
