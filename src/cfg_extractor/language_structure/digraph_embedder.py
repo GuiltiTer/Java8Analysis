@@ -49,8 +49,8 @@ class DiGraphEmbedder(ILanguagePattern):
         then_part = then_part >> len(g)
         else_part = else_part >> len(g) + len(then_part)
         g_last = else_part.last + 1
-        g.add_node(g_last, value=[])
         g = g | then_part | else_part
+        g.add_node(g_last, value=[])
         return g.add_edges_from([(g_head, else_part.head, EdgeLabel.false.name),
                                  (g_head, then_part.head, EdgeLabel.true.name),
                                  (then_part.last, g_last),
@@ -155,7 +155,8 @@ class DiGraphEmbedder(ILanguagePattern):
                            try_body: "IDiGraphBuilder",
                            exceptions: List[RuleContext],
                            catch_bodies: List["IDiGraphBuilder"]):
-        g = DiGraphBuilder()
+        g_head = 0
+        g = DiGraphBuilder().add_node(g_head, try_body.head)
         accumulated_lengths = list(accumulate(len(body) for body in catch_bodies))
         catch_bodies = [body >> s + len(try_body) for body, s in zip(catch_bodies, accumulated_lengths)]
         g = g | try_body
@@ -164,38 +165,44 @@ class DiGraphEmbedder(ILanguagePattern):
                 if is_throw(ctx):
                     g = g | catch_bodies[0]
                     g.remove_edges_from([(label, successor) for successor in g.successors(label)])
-                    catch = g.last
                     g_last = len(g) + 1
-                    g.add_node(g_last, value=[]).add_edges_from([(label, catch), (catch, g_last)])
+                    g.add_node(g_last, value=[]).add_edges_from([(label, g.last), (g.last, g_last)])
                     g[label] = data[:data.index(ctx)]
                     break
         return g
 
     @classmethod
-    def __resolve_null_node(cls, graph: IDiGraphBuilder, body, end):
-        null_node = []
-        edge_lable = []
+    def __resolve_null_node(cls, graph: IDiGraphBuilder, body):
+        null_nodes = []
         for label, data in graph.node_items:
-            if data == []:
-                null_node.append(label)
-        for lable in null_node[:-1]:
-            for data in graph.as_dict()['edges']:
-                if data[0][1] == lable:
-                    print(graph.as_dict()['edges'])
-                    print(data[1])
-                    edge_lable.append(data[1])
-            if graph.successors(lable):
-                graph.add_edges_from([(predecessor, successor, edge_label) for predecessor, successor, edge_label in zip(graph.predecessors(lable), graph.successors(lable), edge_lable)])
-            graph.remove_node(lable)
+            info = {"label": None, "predecessors": [], "successor": []}
+            if not data:
+                info['label'] = label
+                for edge in graph.as_dict()['edges']:
+                    if edge[0][0] == label:
+                        info['successor'].append(edge[0][1])
+                    elif edge[0][1] == label:
+                        info['predecessors'].append((edge[0][0], edge[1] if edge[1] else []))
+
+            if info["label"] is not None:
+                null_nodes.append(info)
+
+        for node in null_nodes:
+            if node["label"] != graph.last:
+                for p in node['predecessors']:
+                    graph.add_edges_from([(p[0], s, p[1]) for s in node['successor']])
+                graph.remove_node(node['label'])
+
+        graph.reset_node_order()
+
         return graph
 
     @classmethod
     def embed_in_function(cls, body: "IDiGraphBuilder"):
-        end = body.last + 1
         g = DiGraphBuilder()
         g = g | body
         g = cls.__split_on_return(g)
-        return cls.__resolve_null_node(g, body, end)
+        return cls.__resolve_null_node(g, body)
 
     @classmethod
     def __split_on_return(cls, graph: IDiGraphBuilder):
