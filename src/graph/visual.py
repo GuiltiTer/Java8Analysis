@@ -10,18 +10,26 @@ PEN_WIDTH = "2"
 
 
 def draw_CFG(graph, filename, token_stream=None, format="png", verbose=True):
-    gr = gv.Digraph(comment=filename, format=format, node_attr={"shape": "none"})
+    gr = gv.Digraph(comment=filename, format=format, node_attr={"shape": "none"}, strict=True)
     gr.node("start", style="filled", fillcolor="#aaffaa", shape="oval", fontsize=FONT_SIZE)
-
+    gr.node('end', style="filled", fillcolor="#FF0000", shape="oval", fontsize=FONT_SIZE)
+    null_node = None
     for node, args in list(graph.nodes.data()):
-        block_contents = (stringify_block(args, token_stream) if verbose else stringify_block_lineno_only(args))
-        gr.node(str(node), label=build_node_template(node, block_contents))
-    gr.node(str(last_node(graph)), label="end", style="filled", fillcolor="#ffaaaa", shape="oval", fontsize=FONT_SIZE)
+        if not args['value']:
+            null_node = node
+        else:
+            block_contents = (stringify_block(args, token_stream) if verbose else stringify_block_lineno_only(args))
+            gr.node(str(node), label=build_node_template(node, block_contents))
 
     for f, t, args in graph.edges.data():
-        gr.edge(f"{str(f)}", f"{str(t)}", label=args.get("value"), fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
-    gr.edge("start", str(head_node(graph)), penwidth=PEN_WIDTH)
+        if t == null_node:
+            gr.edge(f"{str(f)}", 'end', label=args.get("value") if args.get("value") else "", fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
+        else:
+            gr.edge(f"{str(f)}", f"{str(t)}", label=args.get("value"), fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
+            if t == last_node(graph):
+                gr.edge(f"{str(t)}", "end", fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
 
+    gr.edge("start", str(head_node(graph)), penwidth=PEN_WIDTH)
     gr.render(f"{filename}.gv", view=True)
 
 
@@ -55,10 +63,12 @@ def node_content_to_html(node_contents):
 
 
 def stringify_block(node_args, token_stream):
-    if node_args == []: return "[]"
-    cs = [(rule.start.line, extract_exact_text(token_stream, rule)) for rule in node_args["value"]]
-    b = node_content_to_html(cs)
-    return b
+    if node_args == {}:
+        return ""
+    else:
+        cs = [(rule.start.line, extract_exact_text(token_stream, rule)) for rule in node_args["value"]]
+        b = node_content_to_html(cs)
+        return b
 
 
 def stringify_block_lineno_only(node_args):
