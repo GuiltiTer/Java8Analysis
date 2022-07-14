@@ -217,8 +217,19 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__direct_nodes_to_if(graph, graph.last, is_break)
 
     @classmethod
-    def __split_on_throw(cls, graph: "IDiGraphBuilder", direction_reference):
-        return cls.__direct_nodes_to_if(graph, direction_reference, is_throw)
+    def __split_on_throw(cls, graph: "IDiGraphBuilder"):
+        h = graph.copy()
+        for label, data in graph.node_items:
+            for ctx in data:
+                if is_throw(ctx):
+                    h.remove_edges_from([(label, successor) for successor in graph.successors(label)])
+                    for l in range(label, graph.last):
+                        h.remove_node(l)
+                    h.add_edge(label, graph.last)
+                    h[label] = data[:data.index(ctx)]
+                    break
+        h.reset_node_order()
+        return h
 
     @classmethod
     def __direct_nodes_to_if(cls,
