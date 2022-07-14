@@ -160,21 +160,16 @@ class DiGraphEmbedder(ILanguagePattern):
                            try_body: "IDiGraphBuilder",
                            exceptions: List[RuleContext],
                            catch_bodies: List["IDiGraphBuilder"]):
-        g_head = 0
-        g = DiGraphBuilder().add_node(g_head, try_body.head)
-        accumulated_lengths = list(accumulate(len(body) for body in catch_bodies))
-        catch_bodies = [body >> s + len(try_body) for body, s in zip(catch_bodies, accumulated_lengths)]
+        g = DiGraphBuilder()
+        shifted_catches = []
+        start = len(try_body)
+        for i in range(len(catch_bodies)):
+            shifted_catches.append(catch_bodies[i] >> start)
+            start = shifted_catches[i].last + 1
         g = g | try_body
-        for label, data in g.node_items:
-            for ctx in data:
-                if is_throw(ctx):
-                    g = g | catch_bodies[0]
-                    g.remove_edges_from([(label, successor) for successor in g.successors(label)])
-                    g_last = len(g) + 1
-                    g.add_node(g_last, value=[]).add_edges_from([(label, g.last), (g.last, g_last)])
-                    g[label] = data[:data.index(ctx)]
-                    break
-        return g
+        for object in shifted_catches:
+            g = g | object
+        return cls.__split_on_throw(g)
 
     @classmethod
     def __resolve_null_node(cls, graph: IDiGraphBuilder, body):
