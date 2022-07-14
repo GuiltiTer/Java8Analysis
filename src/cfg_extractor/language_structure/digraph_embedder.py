@@ -59,15 +59,20 @@ class DiGraphEmbedder(ILanguagePattern):
     @classmethod
     def embed_in_switch_case(cls, switcher: RuleContext, labels: List[RuleContext], bodies: List["IDiGraphBuilder"]):
         g_head = 0
+        start = 1
+        shifted_bodies = []
         g = DiGraphBuilder().add_node(g_head, value=[switcher] if switcher else [])
-        accumulated_lengths = list(accumulate(len(body) for body in bodies))
-        bodies = [body >> s + len(g) for body, s in zip(bodies, accumulated_lengths)]
-        g_last = bodies[-1].last + 1
-        for bodies_object in bodies:
+        # accumulated_lengths = list((body >> start).last for body in bodies)
+        # bodies = [body >> s + len(g)for body, s in zip(bodies, accumulated_lengths)]
+        for i in range(len(bodies)):
+            shifted_bodies.append(bodies[i] >> start)
+            start = shifted_bodies[i].last + 1
+        g_last = shifted_bodies[-1].last + 1
+        for bodies_object in shifted_bodies:
             g = g | bodies_object
         g.add_node(g_last, value=[])
-        g.add_edges_from([(g_head, body.head, label.getText() if label else []) for label, body in zip(labels, bodies)])
-        g.add_edges_from([(body.last, body.last + 1) for label, body in zip(labels, bodies)])
+        g.add_edges_from([(g_head, body.head, label.getText() if label else []) for label, body in zip(labels, shifted_bodies)])
+        g.add_edges_from([(body.last, body.last + 1) for label, body in zip(labels, shifted_bodies)])
         return cls.__split_on_break(g)
 
     @classmethod
