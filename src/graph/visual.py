@@ -21,13 +21,16 @@ def draw_CFG(graph, filename, token_stream=None, format="png", verbose=True):
             block_contents = (stringify_block(args, token_stream) if verbose else stringify_block_lineno_only(args))
             gr.node(str(node), label=build_node_template(node, block_contents))
 
-    for f, t, args in graph.edges.data():
-        if t == null_node:
-            gr.edge(f"{str(f)}", 'end', label=args.get("value") if args.get("value") else "", fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
-        else:
-            gr.edge(f"{str(f)}", f"{str(t)}", label=args.get("value"), fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
-            if t == last_node(graph):
-                gr.edge(f"{str(t)}", "end", fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
+    if not graph.edges:
+        gr.edge(f"{str(last_node(graph))}", "end", fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
+    else:
+        for f, t, args in graph.edges.data():
+            if t == null_node:
+                gr.edge(f"{str(f)}", 'end', label=args.get("value") if args.get("value") else "", fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
+            else:
+                gr.edge(f"{str(f)}", f"{str(t)}", label=args.get("value"), fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
+                if t == last_node(graph):
+                    gr.edge(f"{str(t)}", "end", fontsize=FONT_SIZE, penwidth=PEN_WIDTH)
 
     gr.edge("start", str(head_node(graph)), penwidth=PEN_WIDTH)
     gr.render(f"{filename}.gv", view=True)
