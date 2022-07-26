@@ -167,9 +167,9 @@ class DiGraphEmbedder(ILanguagePattern):
             shifted_catches.append(catch_bodies[i] >> start)
             start = shifted_catches[i].last + 1
         g = g | try_body
-        for object in shifted_catches:
-            g = g | object
-        return cls.__split_on_throw(g)
+        g_last = try_body.last + 1
+        g.add_node(g_last, []).add_edge(try_body.last, g_last)
+        return cls.__split_on_throw(g, shifted_catches, exceptions)
 
     @classmethod
     def __resolve_null_node(cls, graph: IDiGraphBuilder, body):
@@ -217,17 +217,25 @@ class DiGraphEmbedder(ILanguagePattern):
         return cls.__direct_nodes_to_if(graph, graph.last, is_break)
 
     @classmethod
-    def __split_on_throw(cls, graph: "IDiGraphBuilder"):
+    def __split_on_throw(cls, graph: "IDiGraphBuilder", execption_body, execpetion_label):
         h = graph.copy()
+        expression = None
         for label, data in graph.node_items:
             for ctx in data:
                 if is_throw(ctx):
+                    for i in range(len(ctx.expression().getText())):
+                        if ctx.expression().getText()[i] == "(":
+                            expression = ctx.expression().getText()[3:i]
                     h.remove_edges_from([(label, successor) for successor in graph.successors(label)])
-                    for l in range(label, graph.last):
-                        h.remove_node(l)
-                    h.add_edge(label, graph.last)
-                    h[label] = data[:data.index(ctx)]
-                    break
+                    # for l in range(label, graph.last):
+                    #     h.remove_node(l)
+                    for catch_label, catch_body in zip(execpetion_label, execption_body):
+                        if catch_label.catchType().getText() == expression:
+                            h = h | catch_body
+                            h.add_edge(label, catch_body.head)
+                            h[label] = data[:data.index(ctx)]
+                            break
+
         h.reset_node_order()
         return h
 
